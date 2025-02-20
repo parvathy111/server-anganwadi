@@ -1,0 +1,33 @@
+# Node.js dependencies
+node_modules/
+package-lock.json
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment Variables
+.env
+
+# Editor & OS Specific
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Build & Cache
+dist/
+build/
+.cache/
+coverage/
+
+# MongoDB Data (if using local DB storage)
+data/db/
+dump/
+
+# Debugger
+*.swp
+*.swo

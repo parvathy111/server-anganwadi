@@ -5,6 +5,7 @@ const Supervisor = require('./supervisor.model');
 const { verifyAdmin } = require('../../middlewares/authMiddleware');
 
 const router = express.Router();
+const AnganawadiRoutes = require('../anganawadi/anganawadi.controller');
 
 // Supervisor Login Route
 router.post('/login', async (req, res) => {
@@ -47,5 +48,7 @@ router.post('/createsupervisor', verifyAdmin, async (req, res) => {
         res.status(500).json({ message: 'Server error', error });
     }
 });
+
+router.use(AnganawadiRoutes);
 
 module.exports = router;

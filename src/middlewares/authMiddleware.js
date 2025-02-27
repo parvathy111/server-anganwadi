@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const Admin = require('../api/admin/admin.model');
 const Supervisor = require('../api/supervisor/supervisor.model');
 
+
 const auth = (req, res, next) => {
     const token = req.header('Authorization');
     if (!token) return res.status(401).json({ message: 'Access Denied' });
@@ -57,6 +58,7 @@ const verifySupervisor = async (req, res, next) => {
         return res.status(401).json({ message: 'Invalid token', error });
     }
 };
+
 
 
 

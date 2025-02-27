@@ -2,10 +2,11 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const Supervisor = require('./supervisor.model');
-const { verifyAdmin } = require('../../middlewares/authMiddleware');
+const { verifyAdmin, verifySupervisor } = require('../../middlewares/authMiddleware');
 
 const router = express.Router();
 const AnganawadiRoutes = require('../anganawadi/anganawadi.controller');
+const addProduct = require('./product.controller');
 
 // Supervisor Login Route
 router.post('/login', async (req, res) => {
@@ -50,5 +51,10 @@ router.post('/createsupervisor', verifyAdmin, async (req, res) => {
 });
 
 router.use(AnganawadiRoutes);
+
+
+// Route to add a new product
+router.post('/addProduct', verifySupervisor, addProduct);
+
 
 module.exports = router;

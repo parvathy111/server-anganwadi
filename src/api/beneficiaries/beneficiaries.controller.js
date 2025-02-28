@@ -1,9 +1,14 @@
+
 const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const { Parent, PregLactWomen } = require('./beneficiaries.model');
+
+const JWT_SECRET = 'your_jwt_secret_key'; // Replace with a secure secret key
+
 // Function to hash password
 const hashPassword = async (password) => await bcrypt.hash(password, 10);
 
@@ -53,10 +58,49 @@ const registerPregLactWomen = async (req, res) => {
     }
 };
 
+// Login function
+const loginBeneficiary = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
+
+        let user = await Parent.findOne({ email });
+        let role = 'Parent';
+
+        if (!user) {
+            user = await PregLactWomen.findOne({ email });
+            role = 'PregLactWomen';
+        }
+
+        if (!user) {
+            return res.status(400).json({ message: 'Invalid email or password' });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Invalid email or password' });
+        }
+
+        const token = jwt.sign(
+            { userId: user._id, email: user.email, role },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.status(200).json({ message: 'Login successful', token, user: { id: user._id, email: user.email, role } });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 // Routes
 router.post('/register/:beneficiaries', async (req, res) => {
     const { beneficiaries } = req.params;
     return beneficiaries === 'parent' ? registerParent(req, res) : registerPregLactWomen(req, res);
 });
+
+router.post('/login', loginBeneficiary);
 
 module.exports = router;

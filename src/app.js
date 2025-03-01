@@ -9,6 +9,7 @@ const workerRoutes = require('./api/worker/worker.controller');
 const productRoutes = require('./api/supervisor/product.controller');
 const beneficiaryRoutes = require('./api/beneficiaries/beneficiaries.controller');
 const eventRoutes = require('./api/worker/events.controller');
+const vaccineRoutes = require('./api/worker/vaccine.controller');
 
 const app = express();
 app.use(cors());
@@ -21,5 +22,6 @@ app.use('/worker', workerRoutes);
 app.use('/products', productRoutes);
 app.use('/beneficiaries', beneficiaryRoutes); 
 app.use('/events', eventRoutes);
+app.use('/vaccines', vaccineRoutes); 
 
 module.exports = app;

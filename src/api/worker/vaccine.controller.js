@@ -1,22 +1,26 @@
 const Vaccine = require('./vaccine.model');
 const mongoose = require('mongoose');
 const express = require('express');
+const { verifyWorker } = require('../../middlewares/authMiddleware');
 const router = express.Router();
 
 
 // Add a new vaccine to the table
 const addVaccine = async (req, res) => {
     try {
-        const { vaccine, stage, dose, vaccinator, completed_person, date, time } = req.body;
+        const { vaccine, stage, dose, vaccinator, last_date, vaccinee_role } = req.body;
+        const existingVaccine = await Vaccine.findOne({ vaccine: vaccine.trim() });
+        if (existingVaccine) {
+            return res.status(400).json({ status: 'error', message: 'Vaccine with this name already exists' });
+        }
         const newVaccine = new Vaccine({
             _id: new mongoose.Types.ObjectId(),
             vaccine,
             stage,
             dose,
             vaccinator,
-            completed_person,
-            date,
-            time
+            last_date,
+            vaccinee_role
         });
         await newVaccine.save();
         res.status(201).json({ message: 'New vaccine added successfully', newVaccine });
@@ -25,8 +29,23 @@ const addVaccine = async (req, res) => {
     }
 };
 
-router.post('/add', addVaccine);
+const getVaccinatedUsers = async (req, res) => {
+    try {
+        const { vaccineId } = req.params;
+        console.log(vaccineId);
+        
+        const vaccine = await Vaccine.findById(vaccineId );
+        if (!vaccine) return res.status(404).json({ status: 'error', message: 'Vaccine not found' });
+        const vaccinatedUsers = vaccine.completed_persons;
+        return res.status(200).json({ status: 'success', vaccinatedUsers });
 
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+}
+router.post('/add', verifyWorker, addVaccine);
+
+router.post('/getvaccinatedusers/:vaccineId', getVaccinatedUsers);
 module.exports = router;
 
 // module.exports = exports;

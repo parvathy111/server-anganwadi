@@ -6,8 +6,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const { Parent, PregLactWomen } = require('./beneficiaries.model');
+const Vaccines = require('../worker/vaccine.model')
 
-const JWT_SECRET = 'your_jwt_secret_key'; // Replace with a secure secret key
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // Function to hash password
 const hashPassword = async (password) => await bcrypt.hash(password, 10);
@@ -102,5 +103,40 @@ router.post('/register/:beneficiaries', async (req, res) => {
 });
 
 router.post('/login', loginBeneficiary);
+
+router.post('/vaccinated', async (req, res) => {
+    try {
+        const { userId, vaccineId } = req.body;
+
+        if (!userId || !vaccineId) {
+            return res.status(400).json({ status: 'error', message: 'Missing required fields' });
+        }
+
+        const vaccine = await Vaccines.findById(vaccineId);
+        if (!vaccine) {
+            return res.status(404).json({ status: 'error', message: 'Vaccine not found' });
+        }
+
+        // Prevent duplicate entries
+        if (!vaccine.completed_persons.includes(userId)) {
+            vaccine.completed_persons.push(userId);
+            await vaccine.save();
+        }
+
+        res.status(200).json({ status: 'success', message: 'User marked as vaccinated' });
+    } catch (error) {
+        console.error('Error updating vaccination status:', error);
+        res.status(500).json({ status: 'error', message: 'Internal Server Error' });
+    }
+});
+
+router.get('/getallvaccines', async (req, res) => {
+    const { vaccinee_role } = req.body;
+
+    const vaccines = await Vaccines.find({ vaccinee_role })
+
+    return res.status(200).json({ vaccines })
+    
+})
 
 module.exports = router;

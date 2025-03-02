@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../api/admin/admin.model');
 const Supervisor = require('../api/supervisor/supervisor.model');
+const Worker = require('../api/worker/worker.model');
 
 
 const auth = (req, res, next) => {
@@ -60,6 +61,27 @@ const verifySupervisor = async (req, res, next) => {
 };
 
 
+const verifyWorker = async (req, res, next) => {
+    try {
+        const token = req.headers.authorization;
+        if (!token) {
+            return res.status(403).json({ message: 'Access denied, no token provided' });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        console.log(decoded);
+        const worker = await Worker.findById(decoded.id);
+        if (!worker) {
+            return res.status(403).json({ message: 'Only supervisors can perform this action' });
+        }
+
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Invalid token', error });
+    }
+};
 
 
-module.exports = { auth, verifyAdmin, verifySupervisor };
+
+
+module.exports = { auth, verifyAdmin, verifySupervisor, verifyWorker };

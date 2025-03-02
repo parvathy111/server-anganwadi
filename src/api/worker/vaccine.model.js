@@ -4,7 +4,8 @@ const VaccineSchema = new mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     vaccine: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     stage: {
         type: String,
@@ -14,21 +15,21 @@ const VaccineSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
-    vaccinator: {
+    vaccinator: { 
         type: String,
         required: true
     },
-    completed_person: {
-        type: Number,
-        required: true,
-        default: 0
+    completed_persons: [{
+        type: mongoose.Schema.Types.ObjectId,
+        refPath: 'vaccinee_role'
+    }],
+    vaccinee_role: {
+        type: String,
+        enum: ['Parent', 'PregLactWomen'],
+        required: true
     },
-    date: {
+    last_date: {
         type: Date,
-        required: true
-    },
-    time: {
-        type: String,
         required: true
     }
 }, { timestamps: true });

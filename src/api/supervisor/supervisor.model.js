@@ -7,7 +7,7 @@ const supervisorSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    local_body: {
+    localBody: {
         type: String,
         required: true
     },

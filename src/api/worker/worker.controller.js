@@ -36,14 +36,14 @@ router.post('/login', async (req, res) => {
 // Route to add a worker (Only Supervisor can add)
 router.post('/createworker', verifySupervisor, async (req, res) => {
     try {
-        const { name, anganwadi_no, phone, email, address, gender, dob, password } = req.body;
+        const { name, anganwadiNo, phone, email, address, gender, dob, password } = req.body;
         const existingWorker = await Worker.findOne({ email });
 
         if (existingWorker) {
             return res.status(400).json({ message: 'Worker already exists' });
         }
 
-        const newWorker = new Worker({ name, anganwadi_no, phone, email, address, gender, dob, password });
+        const newWorker = new Worker({ name, anganwadiNo, phone, email, address, gender, dob, password });
         await newWorker.save();
 
         res.status(201).json({ message: 'Worker created successfully' });

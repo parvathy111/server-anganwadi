@@ -19,16 +19,16 @@ const VaccineSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    completed_persons: [{
+    completedPersons: [{
         type: mongoose.Schema.Types.ObjectId,
         refPath: 'vaccinee_role'
     }],
-    vaccinee_role: {
+    vaccineeRole: {
         type: String,
         enum: ['Parent', 'PregLactWomen'],
         required: true
     },
-    last_date: {
+    lastDate: {
         type: Date,
         required: true
     }

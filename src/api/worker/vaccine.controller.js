@@ -8,7 +8,7 @@ const router = express.Router();
 // Add a new vaccine to the table
 const addVaccine = async (req, res) => {
     try {
-        const { vaccine, stage, dose, vaccinator, last_date, vaccinee_role } = req.body;
+        const { vaccine, stage, dose, vaccinator, lastDate, vaccineeRole } = req.body;
         const existingVaccine = await Vaccine.findOne({ vaccine: vaccine.trim() });
         if (existingVaccine) {
             return res.status(400).json({ status: 'error', message: 'Vaccine with this name already exists' });
@@ -19,8 +19,8 @@ const addVaccine = async (req, res) => {
             stage,
             dose,
             vaccinator,
-            last_date,
-            vaccinee_role
+            lastDate,
+            vaccineeRole
         });
         await newVaccine.save();
         res.status(201).json({ message: 'New vaccine added successfully', newVaccine });
@@ -36,7 +36,7 @@ const getVaccinatedUsers = async (req, res) => {
         
         const vaccine = await Vaccine.findById(vaccineId );
         if (!vaccine) return res.status(404).json({ status: 'error', message: 'Vaccine not found' });
-        const vaccinatedUsers = vaccine.completed_persons;
+        const vaccinatedUsers = vaccine.completedPersons;
         return res.status(200).json({ status: 'success', vaccinatedUsers });
 
     } catch (error) {

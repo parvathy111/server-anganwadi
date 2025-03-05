@@ -7,7 +7,7 @@ const workerSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    anganwadi_no: {
+    anganwadiNo: {
         type: String,
         required: true
     },

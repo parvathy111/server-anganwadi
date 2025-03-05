@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
 
 const anganwadiSchema = new mongoose.Schema({
-    anganwadi_no: {
+anganwadiNo: {
         type: String,
         required: true,
         unique: true
     },
-    local_body: {
+    localBody: {
         type: String,
         required: true
     }

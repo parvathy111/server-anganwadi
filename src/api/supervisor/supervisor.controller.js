@@ -34,14 +34,14 @@ router.post('/login', async (req, res) => {
 // Route to add a supervisor (Only Admin can add)
 router.post('/createsupervisor', verifyAdmin, async (req, res) => {
     try {
-        const { fullname, local_body, gender, address, phone, email, password } = req.body;
+        const { fullname, localBody, gender, address, phone, email, password } = req.body;
         const existingSupervisor = await Supervisor.findOne({ email });
 
         if (existingSupervisor) {
             return res.status(400).json({ message: 'Supervisor already exists' });
         }
 
-        const newSupervisor = new Supervisor({ fullname, local_body, gender, address, phone, email, password });
+        const newSupervisor = new Supervisor({ fullname, localBody, gender, address, phone, email, password });
         await newSupervisor.save();
 
         res.status(201).json({ message: 'Supervisor created successfully' });

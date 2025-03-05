@@ -27,8 +27,8 @@ const Parent = mongoose.model('Parent', parentSchema);
 const pregLactWomenSchema = new mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     fullname: { type: String, required: true },
-    delivery_date: { type: Date, required: true },
-    prev_num_preg: { type: Number, required: true },
+    deliveryDate: { type: Date, required: true },
+    prevNumPreg: { type: Number, required: true },
     address: { type: String, required: true },
     phone: { type: String, required: true },
     email: { type: String, required: true, unique: true },

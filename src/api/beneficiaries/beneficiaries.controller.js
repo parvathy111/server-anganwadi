@@ -39,8 +39,8 @@ const registerParent = async (req, res) => {
 // Register Pregnant/Lactating Woman
 const registerPregLactWomen = async (req, res) => {
     try {
-        const { fullname, delivery_date, Prev_num_preg, address, phone, email, password } = req.body;
-        if (![fullname, delivery_date, Prev_num_preg, address, phone, email, password].every(Boolean)) {
+        const { fullname, deliveryDate, PrevNumPreg, address, phone, email, password } = req.body;
+        if (![fullname, deliveryDate, PrevNumPreg, address, phone, email, password].every(Boolean)) {
             return res.status(400).json({ message: 'All fields are required' });
         }
         if (await PregLactWomen.findOne({ email })) {
@@ -49,7 +49,7 @@ const registerPregLactWomen = async (req, res) => {
         const hashedPassword = await hashPassword(password);
         const newUser = new PregLactWomen({
             _id: new mongoose.Types.ObjectId(),
-            fullname, delivery_date, Prev_num_preg, address, phone, email,
+            fullname, deliveryDate, PrevNumPreg, address, phone, email,
             password: hashedPassword, status: 'Active'
         });
         await newUser.save();
@@ -118,8 +118,8 @@ router.post('/vaccinated', async (req, res) => {
         }
 
         // Prevent duplicate entries
-        if (!vaccine.completed_persons.includes(userId)) {
-            vaccine.completed_persons.push(userId);
+        if (!vaccine.completedPersons.includes(userId)) {
+            vaccine.completedPersons.push(userId);
             await vaccine.save();
         }
 
@@ -133,7 +133,7 @@ router.post('/vaccinated', async (req, res) => {
 router.get('/getallvaccines', async (req, res) => {
     const { vaccinee_role } = req.body;
 
-    const vaccines = await Vaccines.find({ vaccinee_role })
+    const vaccines = await Vaccines.find({ vaccineeRole })
 
     return res.status(200).json({ vaccines })
     

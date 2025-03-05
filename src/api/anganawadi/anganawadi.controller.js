@@ -7,16 +7,16 @@ const router = express.Router();
 // Create a new Anganwadi
 const createAnganwadi = async (req, res) => {
     try {
-        const { anganwadi_no, local_body } = req.body;
+        const { anganwadiNo, localBody } = req.body;
 
         // Check if Anganwadi already exists
-        const existingAnganwadi = await Anganwadi.findOne({ anganwadi_no });
+        const existingAnganwadi = await Anganwadi.findOne({ anganwadiNo });
         if (existingAnganwadi) {
             return res.status(400).json({ message: 'Anganwadi already exists' });
         }
 
         // Create new Anganwadi
-        const newAnganwadi = new Anganwadi({ anganwadi_no, local_body });
+        const newAnganwadi = new Anganwadi({ anganwadiNo, localBody });
         await newAnganwadi.save();
 
         res.status(201).json({ message: 'Anganwadi created successfully', data: newAnganwadi });

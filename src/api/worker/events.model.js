@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
-    event_name: { type: String, required: true },
+    eventName: { type: String, required: true },
     participants: { type: [String], required: true }, // Array of participant names or IDs
     date: { type: Date, required: true },
     time: { type: String, required: true }, // Example format: "10:30 AM"

@@ -39,8 +39,8 @@ const registerParent = async (req, res) => {
 // Register Pregnant/Lactating Woman
 const registerPregLactWomen = async (req, res) => {
     try {
-        const { fullname, deliveryDate, PrevNumPreg, address, phone, email, password } = req.body;
-        if (![fullname, deliveryDate, PrevNumPreg, address, phone, email, password].every(Boolean)) {
+        const { fullname, deliveryDate, prevNumPreg, address, phone, email, password } = req.body;
+        if (![fullname, deliveryDate, prevNumPreg, address, phone, email, password].every(Boolean)) {
             return res.status(400).json({ message: 'All fields are required' });
         }
         if (await PregLactWomen.findOne({ email })) {
@@ -49,7 +49,7 @@ const registerPregLactWomen = async (req, res) => {
         const hashedPassword = await hashPassword(password);
         const newUser = new PregLactWomen({
             _id: new mongoose.Types.ObjectId(),
-            fullname, deliveryDate, PrevNumPreg, address, phone, email,
+            fullname, deliveryDate, prevNumPreg, address, phone, email,
             password: hashedPassword, status: 'Active'
         });
         await newUser.save();

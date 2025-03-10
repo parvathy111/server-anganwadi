@@ -27,7 +27,7 @@ const registerParent = async (req, res) => {
         const newParent = new Parent({
             _id: new mongoose.Types.ObjectId(),
             childname, dob, gender, fathername, mothername, address, phone, email,
-            password: hashedPassword, status: 'Active'
+            password: hashedPassword
         });
         await newParent.save();
         res.status(201).json({ message: 'Parent registered successfully', parent: newParent });
@@ -50,7 +50,7 @@ const registerPregLactWomen = async (req, res) => {
         const newUser = new PregLactWomen({
             _id: new mongoose.Types.ObjectId(),
             fullname, deliveryDate, prevNumPreg, address, phone, email,
-            password: hashedPassword, status: 'Active'
+            password: hashedPassword
         });
         await newUser.save();
         res.status(201).json({ message: 'User registered successfully', user: newUser });
@@ -82,6 +82,10 @@ const loginBeneficiary = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({ message: 'Invalid email or password' });
+        }
+
+        if (user.status !== "Active") {
+            return res.status(403).json({ message: "Your account is not active. Please contact the admin." });
         }
 
         const token = jwt.sign(

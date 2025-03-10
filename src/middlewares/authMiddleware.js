@@ -63,10 +63,14 @@ const verifySupervisor = async (req, res, next) => {
 
 const verifyWorker = async (req, res, next) => {
     try {
-        const token = req.headers.authorization;
+        const authHeader = req.header('authorization');
+        const token = authHeader.split(" ")[1]
         if (!token) {
             return res.status(403).json({ message: 'Access denied, no token provided' });
         }
+
+        // console.log(token)
+
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         console.log(decoded);

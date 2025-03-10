@@ -8,6 +8,7 @@ const router = express.Router();
 // Add a new vaccine to the table
 const addVaccine = async (req, res) => {
     try {
+        console.log(req.body)
         const { vaccine, stage, dose, vaccinator, lastDate, vaccineeRole } = req.body;
         const existingVaccine = await Vaccine.findOne({ vaccine: vaccine.trim() });
         if (existingVaccine) {

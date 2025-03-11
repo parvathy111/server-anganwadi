@@ -59,6 +59,54 @@ const registerPregLactWomen = async (req, res) => {
     }
 };
 
+// Approve Beneficiary (Change status to "Active")
+router.put('/approve/:id', async (req, res) => {
+    try {
+        const beneficiary = await Parent.findById(req.params.id) || await PregLactWomen.findById(req.params.id);
+
+        if (!beneficiary) {
+            return res.status(404).json({ message: 'Beneficiary not found' });
+        }
+
+        beneficiary.status = "Active";
+        await beneficiary.save();
+
+        res.status(200).json({ message: "Beneficiary approved successfully", beneficiary });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
+// Remove Beneficiary
+router.delete('/remove/:id', async (req, res) => {
+    try {
+        const deletedBeneficiary = await Parent.findByIdAndDelete(req.params.id) || await PregLactWomen.findByIdAndDelete(req.params.id);
+
+        if (!deletedBeneficiary) {
+            return res.status(404).json({ message: "Beneficiary not found" });
+        }
+
+        res.status(200).json({ message: "Beneficiary removed successfully" });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
+
+// Get All Beneficiaries
+router.get('/all', async (req, res) => {
+    try {
+        const parents = await Parent.find();
+        const women = await PregLactWomen.find();
+
+        res.status(200).json({ beneficiaries: [...parents, ...women] });
+    } catch (error) {
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
+
+
 // Login function
 const loginBeneficiary = async (req, res) => {
     try {

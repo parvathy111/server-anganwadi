@@ -6,8 +6,9 @@ const { verifySupervisor } = require('../../middlewares/authMiddleware');
 // Controller function to add a product
 const addProduct = async (req, res) => {
     try {
+        console.log(req.body)
         const { itemid, productname, image } = req.body;
-
+        
         // Validate required fields
         if (!itemid || !productname || !image) {
             return res.status(400).json({ message: 'All fields are required' });

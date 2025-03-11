@@ -6,21 +6,22 @@ const Event = require('./events.model'); // Import the Event model
 // Worker: Add a new event (Status: "Pending Approval")
 const addEvent = async (req, res) => {
     try {
-        const { EventName, participants, date, time, ConductedBy } = req.body;
+        console.log(req.body)
+        const { eventName, participants, date, time, conductedBy } = req.body;
 
-        if (![EventName, date, time, ConductedBy].every(Boolean)) {
+        if (![eventName, date, time, conductedBy].every(Boolean)) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
         const newEvent = new Event({
             _id: new mongoose.Types.ObjectId(),
-            EventName,
+            eventName,
             participants: participants || [], // Default empty array if no participants
             date,
             time,
             status: 'Pending Approval', // Default status
             participantCount: 0, // Default participant count
-            ConductedBy
+            conductedBy
         });
 
         await newEvent.save();

@@ -31,6 +31,20 @@ const addEvent = async (req, res) => {
     }
 };
 
+// Fetch all events
+const getEvents = async (req, res) => {
+    try {
+        const events = await Event.find(); // Fetch all events from MongoDB
+        res.status(200).json(events);
+    console.log(events);
+
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+
+
 // Supervisor: Approve the event (Changes status to "Scheduled")
 const approveEvent = async (req, res) => {
     try {
@@ -53,6 +67,7 @@ const approveEvent = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
 
 // Worker: Update Participant_no after event completion
 const updateParticipants = async (req, res) => {
@@ -83,8 +98,10 @@ const updateParticipants = async (req, res) => {
 };
 
 // Routes
+router.get('/', getEvents);
 router.post('/add', addEvent); // Worker adds an event
 router.put('/approve/:eventId', approveEvent); // Supervisor approves the event
 router.put('/update-participants/:eventId', updateParticipants); // Worker updates participant count
 
 module.exports = router;
+

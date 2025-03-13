@@ -63,8 +63,10 @@ const verifySupervisor = async (req, res, next) => {
 
 const verifyWorker = async (req, res, next) => {
     try {
-        const authHeader = req.header('authorization');
+        const authHeader = req.header('Authorization');
+        // console.log(authHeader);
         const token = authHeader.split(" ")[1]
+        console.log(token);
         if (!token) {
             return res.status(403).json({ message: 'Access denied, no token provided' });
         }

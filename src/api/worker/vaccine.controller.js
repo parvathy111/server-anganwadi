@@ -30,6 +30,15 @@ const addVaccine = async (req, res) => {
     }
 };
 
+const getAllVaccines = async (req, res) => {
+    try {
+        const vaccines = await Vaccine.find();
+        res.status(200).json(vaccines);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
 const getVaccinatedUsers = async (req, res) => {
     try {
         const { vaccineId } = req.params;
@@ -44,6 +53,9 @@ const getVaccinatedUsers = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+router.get('/', getAllVaccines);
+
 router.post('/add', verifyWorker, addVaccine);
 
 router.post('/getvaccinatedusers/:vaccineId', getVaccinatedUsers);

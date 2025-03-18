@@ -23,7 +23,7 @@ router.post('/login', async (req, res) => {
         if (!worker) {
             return res.status(400).json({ message: 'Invalid email or password' });
         }
-        console.log("hi")
+    
         // Compare passwords
         const isMatch = await bcrypt.compare(password, worker.password);
         if (!isMatch) {
@@ -82,16 +82,22 @@ router.post('/createworker', verifySupervisor, async (req, res) => {
 // 🔹 Change Password Route (Worker must be logged in)
 router.post('/updateworker', verifyWorker, async (req, res) => {
     try {
-       const worker = await Worker.findByIdAndUpdate(req.body._id,req.body,{ new: true, runValidators: true })
+        const worker = await Worker.findById(req.body._id);
 
-       if (!worker) {
-        return res.status(404).json({ message: 'Worker not found' });
-    }
-       res.json({ message: 'Worker profile updated successfully', worker });
+        if (!worker) {
+            return res.status(404).json({ message: 'Worker not found' });
+        }
+
+        Object.assign(worker, req.body);
+
+        await worker.save(); // this will trigger your pre('save') hook
+
+        res.json({ message: 'Worker profile updated successfully', worker });
     } catch (error) {
-        console.error("Error changing password:", error);
+        console.error("Error updating worker:", error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
+
 
 module.exports = router;

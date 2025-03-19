@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const Worker = require('./worker.model');
 const { verifySupervisor, verifyWorker } = require('../../middlewares/authMiddleware');
-const { sendWorkerWelcomeEmail } = require('../../utils/email');
+const { sendWelcomeEmail } = require('../../utils/email');
 
 const router = express.Router();
 
@@ -70,7 +70,9 @@ router.post('/createworker', verifySupervisor, async (req, res) => {
         await newWorker.save();
 
         // Send welcome email with login details
-        await sendWorkerWelcomeEmail(email, name, randomPassword);
+        // await sendWorkerWelcomeEmail(email, name, randomPassword);
+        await sendWelcomeEmail(email, name, randomPassword, 'Worker');
+
 
         res.status(201).json({ message: 'Worker created successfully' });
     } catch (error) {

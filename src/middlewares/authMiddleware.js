@@ -21,6 +21,7 @@ const auth = (req, res, next) => {
 // Middleware to verify admin
 const verifyAdmin = async (req, res, next) => {
     try {
+        
         const token = req.headers.authorization;
         if (!token) {
             return res.status(403).json({ message: 'Access denied, no token provided' });
@@ -40,23 +41,18 @@ const verifyAdmin = async (req, res, next) => {
 };
 
 // Middleware to verify supervisor
-const verifySupervisor = async (req, res, next) => {
+const verifySupervisor = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized' });
+    }
+
     try {
-        const token = req.headers.authorization;
-        if (!token) {
-            return res.status(403).json({ message: 'Access denied, no token provided' });
-        }
-
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(decoded);
-        const supervisor = await Supervisor.findById(decoded.id);
-        if (!supervisor) {
-            return res.status(403).json({ message: 'Only supervisors can perform this action' });
-        }
-
+        req.user = decoded; // THIS MUST SET req.user
         next();
-    } catch (error) {
-        return res.status(401).json({ message: 'Invalid token', error });
+    } catch (err) {
+        return res.status(401).json({ message: 'Token invalid' });
     }
 };
 

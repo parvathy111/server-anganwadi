@@ -106,6 +106,36 @@ router.post('/updatesupervisor', verifySupervisor, async (req, res) => {
     }
 });
 
+
+
+// Route to fetch all supervisors (without authentication)
+router.get('/viewsupervisors', async (req, res) => {
+    try {
+        const supervisors = await Supervisor.find({}, '-password'); // exclude password field
+        res.status(200).json({ supervisors }); // wrap inside an object
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
+
+router.delete("/delete/:id", async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      const deletedSupervisor = await Supervisor.findByIdAndDelete(id);
+  
+      if (!deletedSupervisor) {
+        return res.status(404).json({ message: "Supervisor not found" });
+      }
+  
+      return res.status(200).json({ message: "Supervisor deleted successfully" });
+    } catch (err) {
+      return res.status(500).json({ message: "Server error while deleting supervisor" });
+    }
+  });
+
+
 // other routes
 router.use(AnganawadiRoutes);
 router.post('/addProduct', verifySupervisor, addProduct);

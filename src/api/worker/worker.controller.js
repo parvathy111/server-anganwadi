@@ -102,4 +102,33 @@ router.post('/updateworker', verifyWorker, async (req, res) => {
 });
 
 
+//fetch all
+router.get('/allworkers', async (req, res) => {
+    try {
+        const workers = await Worker.find().select('-password'); // Don't send hashed password
+        res.json(workers);
+    } catch (error) {
+        console.error("Error fetching workers:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
+
+// DELETE worker by ID
+router.delete("/delete/:id", async (req, res) => {
+    const { id } = req.params;
+  
+    try {
+      const deletedWorker = await Worker.findByIdAndDelete(id);
+  
+      if (!deletedWorker) {
+        return res.status(404).json({ message: "Worker not found" });
+      }
+  
+      return res.status(200).json({ message: "Worker deleted successfully" });
+    } catch (err) {
+      return res.status(500).json({ message: "Server error while deleting worker" });
+    }
+  });
+  
 module.exports = router;

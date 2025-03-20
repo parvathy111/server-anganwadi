@@ -98,7 +98,7 @@ const updateParticipants = async (req, res) => {
 };
 
 // Routes
-router.get('/', getEvents);
+router.get('/all', getEvents);
 router.post('/add', addEvent); // Worker adds an event
 router.put('/approve/:eventId', approveEvent); // Supervisor approves the event
 router.put('/update-participants/:eventId', updateParticipants); // Worker updates participant count

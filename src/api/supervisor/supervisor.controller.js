@@ -78,7 +78,6 @@ router.post('/createsupervisor', verifyAdmin, async (req, res) => {
 });
 
 // Supervisor can update password
-// 🔹 Change Profile or Password (Supervisor must be logged in)
 router.post('/updatesupervisor', verifySupervisor, async (req, res) => {
     try {
         const supervisorId = req.user.id; // getting from verifySupervisor middleware
@@ -119,6 +118,7 @@ router.get('/viewsupervisors', async (req, res) => {
 });
 
 
+//delete by id
 router.delete("/delete/:id", async (req, res) => {
     const { id } = req.params;
   

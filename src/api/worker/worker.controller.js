@@ -43,6 +43,7 @@ router.post('/login', async (req, res) => {
 // 🔹 Create Worker Route (Only Supervisor can add)
 router.post('/createworker', verifySupervisor, async (req, res) => {
     try {
+        console.log('Received Data:', req.body);
         const { name, anganwadiNo, phone, email, address, gender, dob } = req.body;
 
         // Check if worker already exists

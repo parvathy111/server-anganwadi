@@ -191,4 +191,26 @@ router.get('/getallvaccines', async (req, res) => {
     
 })
 
+// GET all Pregnant and Lactating Women
+router.get('/preglactwomen', async (req, res) => {
+    try {
+        const women = await PregLactWomen.find();
+        res.status(200).json(women);
+    } catch (err) {
+        console.error('Error fetching PregLactWomen:', err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
+// GET all Parents only
+router.get('/parents', async (req, res) => {
+    try {
+        const parents = await Parent.find();
+        res.status(200).json(parents);
+    } catch (err) {
+        console.error('Error fetching Parents:', err);
+        res.status(500).json({ message: 'Server Error' });
+    }
+});
+
 module.exports = router;

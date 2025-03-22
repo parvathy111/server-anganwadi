@@ -1,7 +1,12 @@
 const mongoose = require('mongoose');
 
 const orderStockSchema = new mongoose.Schema({
-    name: {
+    productname: {
+        type: String,
+        required: true,
+        trim: true
+    },
+    itemid: {
         type: String,
         required: true,
         trim: true
@@ -10,6 +15,11 @@ const orderStockSchema = new mongoose.Schema({
         type: Number,
         required: true,
         min: 1
+    },
+    anganwadiNo: {
+        type: String,
+        required: true,
+        trim: true
     },
     image: {
         type: String, // URL or path to the image

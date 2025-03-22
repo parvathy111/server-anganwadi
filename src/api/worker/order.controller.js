@@ -58,9 +58,9 @@ const approveOrder = async (req, res) => {
             return res.status(400).json({ message: 'Order is not pending approval' });
         }
 
-        order.orderStatus = 'Processing';
+        order.orderStatus = 'Approved'; // ✅ Updated to Approved
         await order.save();
-        res.status(200).json({ message: 'Order approved and is now Processing', order });
+        res.status(200).json({ message: 'Order approved successfully', order });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

@@ -25,7 +25,19 @@ const createAnganwadi = async (req, res) => {
     }
 };
 
+// Get all Anganwadi
+const getAllAnganwadi = async (req, res) => {
+    try {
+        const anganwadis = await Anganwadi.find();
+        res.status(200).json({ data: anganwadis }); // <-- wrap it inside an object with `data` key
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error });
+    }
+};
 
+
+// Route to get all Anganwadi
+router.get('/getallanganwadi', getAllAnganwadi);
 
 // Route to create Anganwadi
 router.post('/createanganawadi', createAnganwadi);

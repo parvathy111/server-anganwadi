@@ -10,6 +10,14 @@ const anganwadiSchema = new mongoose.Schema({
     localBody: {
         type: String,
         required: true
+    },
+    localBodyName: {
+        type: String,
+        required: true
+    },
+    wardNumber: {
+        type: String,
+        required: true
     }
 });
 

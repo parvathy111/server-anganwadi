@@ -6,10 +6,11 @@ const Event = require('./events.model'); // Import the Event model
 // Worker: Add a new event (Status: "Pending Approval")
 const addEvent = async (req, res) => {
     try {
-        console.log(req.body)
-        const { eventName, participants, date, time, conductedBy } = req.body;
+        console.log(req.body);
+        const { eventName, participants, date, time, conductedBy, anganwadiNo } = req.body;
 
-        if (![eventName, date, time, conductedBy].every(Boolean)) {
+        // Validate required fields
+        if (![eventName, date, time, conductedBy, anganwadiNo].every(Boolean)) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
@@ -21,7 +22,8 @@ const addEvent = async (req, res) => {
             time,
             status: 'Pending Approval', // Default status
             participantCount: 0, // Default participant count
-            conductedBy
+            conductedBy,
+            anganwadiNo
         });
 
         await newEvent.save();
@@ -36,14 +38,11 @@ const getEvents = async (req, res) => {
     try {
         const events = await Event.find(); // Fetch all events from MongoDB
         res.status(200).json(events);
-    console.log(events);
-
+        console.log(events);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
-
 
 // Supervisor: Approve the event (Changes status to "Scheduled")
 const approveEvent = async (req, res) => {
@@ -67,7 +66,6 @@ const approveEvent = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
-
 
 // Worker: Update Participant_no after event completion
 const updateParticipants = async (req, res) => {
@@ -104,4 +102,3 @@ router.put('/approve/:eventId', approveEvent); // Supervisor approves the event
 router.put('/update-participants/:eventId', updateParticipants); // Worker updates participant count
 
 module.exports = router;
-

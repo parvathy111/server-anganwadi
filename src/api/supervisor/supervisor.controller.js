@@ -54,14 +54,14 @@ router.post('/createsupervisor', verifyAdmin, async (req, res) => {
         const randomPassword = generateRandomPassword();
 
         // Create new supervisor
-        const newSupervisor = new Supervisor({ 
-            fullname, 
-            localBody, 
-            gender, 
-            address, 
-            phone, 
-            email, 
-            password: randomPassword 
+        const newSupervisor = new Supervisor({
+            fullname,
+            localBody,
+            gender,
+            address,
+            phone,
+            email,
+            password: randomPassword
         });
 
         console.log(`Generated Password for Supervisor: ${randomPassword}`);
@@ -107,6 +107,9 @@ router.post('/updatesupervisor', verifySupervisor, async (req, res) => {
 
 
 
+
+
+
 // Route to fetch all supervisors (without authentication)
 router.get('/viewsupervisors', async (req, res) => {
     try {
@@ -121,19 +124,19 @@ router.get('/viewsupervisors', async (req, res) => {
 //delete by id
 router.delete("/delete/:id", async (req, res) => {
     const { id } = req.params;
-  
+
     try {
-      const deletedSupervisor = await Supervisor.findByIdAndDelete(id);
-  
-      if (!deletedSupervisor) {
-        return res.status(404).json({ message: "Supervisor not found" });
-      }
-  
-      return res.status(200).json({ message: "Supervisor deleted successfully" });
+        const deletedSupervisor = await Supervisor.findByIdAndDelete(id);
+
+        if (!deletedSupervisor) {
+            return res.status(404).json({ message: "Supervisor not found" });
+        }
+
+        return res.status(200).json({ message: "Supervisor deleted successfully" });
     } catch (err) {
-      return res.status(500).json({ message: "Server error while deleting supervisor" });
+        return res.status(500).json({ message: "Server error while deleting supervisor" });
     }
-  });
+});
 
 
 // other routes

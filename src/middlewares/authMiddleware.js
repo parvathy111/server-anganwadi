@@ -22,7 +22,7 @@ const auth = (req, res, next) => {
 const verifyAdmin = async (req, res, next) => {
     try {
         
-        const token = req.headers.authorization;
+        const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
             return res.status(403).json({ message: 'Access denied, no token provided' });
         }
@@ -49,7 +49,8 @@ const verifySupervisor = (req, res, next) => {
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // THIS MUST SET req.user
+        req.user = decoded; // THIS MUST SET req.
+        console.log(decoded);
         next();
     } catch (err) {
         return res.status(401).json({ message: 'Token invalid' });

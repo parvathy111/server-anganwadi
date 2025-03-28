@@ -1,3 +1,5 @@
+
+
 const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
@@ -15,8 +17,13 @@ const productSchema = new mongoose.Schema({
     image: {
         type: String,
         required: true
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Supervisor',  // Assuming you have a Supervisor model
+        required: true
     }
-});
+}, { timestamps: true });
 
 const Product = mongoose.model('Product', productSchema);
 

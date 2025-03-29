@@ -44,7 +44,6 @@ router.post('/login', async (req, res) => {
 // 🔹 Create Worker Route (Only Supervisor can add)
 router.post('/createworker', verifySupervisor, async (req, res) => {
     try {
-        console.log('Received Data:', req.body);
         const { name, anganwadiNo, phone, email, address, gender, dob } = req.body;
         const supervisorId = req.user.id; // Assuming `req.user.id` is set after authentication
 
@@ -56,7 +55,7 @@ router.post('/createworker', verifySupervisor, async (req, res) => {
 
         // Generate and hash a random password
         const randomPassword = generateRandomPassword();
-        const hashedPassword = await bcrypt.hash(randomPassword, 10);
+       
 
         // Create new worker
         const newWorker = new Worker({
@@ -67,12 +66,12 @@ router.post('/createworker', verifySupervisor, async (req, res) => {
             address,
             gender,
             dob,
-            password: hashedPassword, // Store hashed password
+            password: randomPassword, 
             createdBy: supervisorId   // Assigning the logged-in supervisor ID
         });
 
         await newWorker.save();
-        console.log("Generated Password:", randomPassword);
+        
 
         // Send welcome email with login details
         await sendWelcomeEmail(email, name, randomPassword, 'Worker');

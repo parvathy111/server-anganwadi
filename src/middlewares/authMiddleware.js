@@ -22,7 +22,7 @@ const auth = (req, res, next) => {
 const verifyAdmin = async (req, res, next) => {
     try {
         
-        const token = req.headers.authorization?.split(' ')[1];
+        const token = req.headers.authorization?.split(' ').pop();
         if (!token) {
             return res.status(403).json({ message: 'Access denied, no token provided' });
         }
@@ -42,7 +42,11 @@ const verifyAdmin = async (req, res, next) => {
 
 // Middleware to verify supervisor
 const verifySupervisor = (req, res, next) => {
-    const token = req.headers.authorization?.split(' ')[1];
+    console.log("hi");
+   
+    const token = req.headers.authorization?.split(' ').pop();
+    
+    console.log(req.headers.authorization);
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
@@ -62,7 +66,7 @@ const verifyWorker = async (req, res, next) => {
     try {
         const authHeader = req.header('Authorization');
         // console.log(authHeader);
-        const token = authHeader.split(" ")[1]
+        const token = authHeader.split(" ").pop();
         console.log(token);
         if (!token) {
             return res.status(403).json({ message: 'Access denied, no token provided' });

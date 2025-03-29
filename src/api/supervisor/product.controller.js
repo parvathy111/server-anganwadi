@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Product = require('./product.model');
 const { verifySupervisor } = require('../../middlewares/authMiddleware');
+const Worker = require('../worker/worker.model');
+
 
 // Controller function to add a product
 const addProduct = async (req, res) => {
@@ -79,16 +81,42 @@ router.delete("/delete/:id", async (req, res) => {
     }
   });
 
-router.get('/all', async (req, res) => {
+//   router.get('/all', async (req, res) => {
+//     try {
+//         const products = await Product.find();
+//         res.status(200).json(products);
+//     } catch (error) {
+//         res.status(500).json({ message: 'Server error', error: error.message });
+//     }
+// });
+
+router.get('/all', verifySupervisor, async (req, res) => {
     try {
-        const products = await Product.find();
+        const workerId = req.user.id;  // This should now be a worker's ID
+
+        // Find the worker's supervisor
+        const worker = await Worker.findById(workerId);
+        if (!worker) {
+            return res.status(404).json({ message: 'Worker not found' });
+        }
+
+        const supervisorId = worker.createdBy; // 'createdBy' is the supervisor
+        if (!supervisorId) {
+            return res.status(404).json({ message: 'Supervisor not assigned to this worker' });
+        }
+
+        // Fetch products created by this supervisor
+        const products = await Product.find({ createdBy: supervisorId });
+
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
 
+
 // Routes
 router.post('/add', verifySupervisor, addProduct);
 router.get("/my-products", verifySupervisor, getSupervisorProducts);
+
 module.exports = router;

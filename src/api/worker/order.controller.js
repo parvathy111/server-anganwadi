@@ -91,6 +91,31 @@ const approveOrder = async (req, res) => {
     }
 };
 
+
+// ✅ Supervisor: Reject an order (with authentication)
+const rejectOrder = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const order = await OrderStock.findById(orderId);
+
+        if (!order) return res.status(404).json({ message: "Order not found" });
+
+        if (order.orderStatus !== "Pending") {
+            return res.status(400).json({ message: "Order is not pending approval" });
+        }
+
+        order.orderStatus = "Rejected";
+        await order.save();
+
+        res.status(200).json({ message: "Order rejected successfully", order });
+    } catch (error) {
+        console.error("Reject Order Error:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+
+
 // "Cancel Order" (hard delete)
 const cancelOrder = async (req, res) => {
     try {
@@ -142,10 +167,9 @@ const updateOrder = async (req, res) => {
 const getSupervisorOrders = async (req, res) => {
     try {
         if (!req.user || !req.user.id) {
-            return res.status(403).json({ message: "Unauthorized: Supervisor ID missing" });
+            return res.status(401).json({ message: "Unauthorized: Supervisor ID missing" });
         }
 
-        // Find workers under this supervisor
         const workers = await Worker.find({ createdBy: req.user.id }).select('_id');
         const workerIds = workers.map(worker => worker._id);
 
@@ -158,12 +182,16 @@ const getSupervisorOrders = async (req, res) => {
     }
 };
 
+
+
 // ✅ Routes with authentication
 router.post('/create', verifyWorker, createOrder);
 router.get('/my-orders', verifyWorker, getWorkerOrders);
 router.put('/approve/:orderId', verifySupervisor, approveOrder); // ✅ Only supervisors can approve
+router.put('/reject/:orderId', verifySupervisor, rejectOrder);
 router.get('/all', verifySupervisor, getSupervisorOrders); // ✅ Only supervisors can view all orders
 router.put('/update/:orderId', updateOrder);
 router.delete('/cancel/:orderId', cancelOrder); // Cancel & hard delete
+
 
 module.exports = router;

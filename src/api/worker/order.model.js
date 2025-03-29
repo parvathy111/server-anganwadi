@@ -31,8 +31,13 @@ const orderStockSchema = new mongoose.Schema({
     },
     orderStatus: {
         type: String,
-        enum: ['Pending', 'Processing', 'Completed', 'Cancelled'],
+        enum: ['Pending', 'Approved', 'Processing', 'Completed', 'Cancelled'],
         default: 'Pending'
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Worker',
+        required: true
     }
 });
 

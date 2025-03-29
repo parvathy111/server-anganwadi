@@ -42,11 +42,11 @@ const verifyAdmin = async (req, res, next) => {
 
 // Middleware to verify supervisor
 const verifySupervisor = (req, res, next) => {
-    console.log("hi");
+  
    
     const token = req.headers.authorization?.split(' ').pop();
     
-    console.log(req.headers.authorization);
+
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized' });
     }
@@ -82,6 +82,7 @@ const verifyWorker = async (req, res, next) => {
             return res.status(403).json({ message: 'Only supervisors can perform this action' });
         }
 
+        req.user = { id: worker._id };
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Invalid token', error });

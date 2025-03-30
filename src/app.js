@@ -12,6 +12,7 @@ const eventRoutes = require('./api/worker/events.controller');
 const vaccineRoutes = require('./api/worker/vaccine.controller');
 const orderRoutes = require('./api/worker/order.controller');
 const anganwadiRoutes = require('./api/anganawadi/anganawadi.controller');
+const dailyTrackRoutes = require('./api/worker/dailytrack.controller');
 
 const app = express();
 app.use(cors());
@@ -28,5 +29,7 @@ app.use('/vaccines', vaccineRoutes);
 
 app.use('/orders', orderRoutes);
 app.use('/anganavadi', anganwadiRoutes);
+
+app.use('/dailytracks', dailyTrackRoutes);
 
 module.exports = app;

@@ -82,7 +82,7 @@ const verifyWorker = async (req, res, next) => {
             return res.status(403).json({ message: 'Only supervisors can perform this action' });
         }
 
-        req.user = { id: worker._id };
+        req.user = { id: worker._id, anganwadiNo: worker.anganwadiNo };
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Invalid token', error });

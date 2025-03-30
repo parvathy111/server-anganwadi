@@ -153,4 +153,16 @@ router.delete('/delete/:id', verifySupervisor, async (req, res) => {
     }
 });
 
+
+router.get("/me", verifyWorker, async (req, res) => {
+    try {
+      const worker = await Worker.findById(req.user.id);
+      if (!worker) return res.status(404).json({ message: "Worker not found" });
+  
+      res.json({ anganwadiNo: worker.anganwadiNo });
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
+    }
+  });
+
 module.exports = router;

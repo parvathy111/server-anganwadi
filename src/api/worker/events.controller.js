@@ -2,20 +2,23 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Event = require('./events.model'); // Import the Event model
+const Worker = require('./worker.model'); 
+const { verifyWorker, verifySupervisor } = require('../../middlewares/authMiddleware');
 
-// Worker: Add a new event (Status: "Pending Approval")
+
 const addEvent = async (req, res) => {
     try {
-        console.log(req.body);
+        // console.log(req.body);
         const { eventName, participants, date, time, conductedBy, anganwadiNo } = req.body;
+        const workerId = req.user.id; // Assuming worker's ID is stored in `req.user` after authentication
 
+        console.log(workerId);
         // Validate required fields
         if (![eventName, date, time, conductedBy, anganwadiNo].every(Boolean)) {
             return res.status(400).json({ message: 'All fields are required' });
         }
 
         const newEvent = new Event({
-            _id: new mongoose.Types.ObjectId(),
             eventName,
             participants: participants || [], // Default empty array if no participants
             date,
@@ -23,7 +26,8 @@ const addEvent = async (req, res) => {
             status: 'Pending Approval', // Default status
             participantCount: 0, // Default participant count
             conductedBy,
-            anganwadiNo
+            anganwadiNo,
+            createdBy: workerId // Automatically assigning the worker's ID
         });
 
         await newEvent.save();
@@ -33,16 +37,53 @@ const addEvent = async (req, res) => {
     }
 };
 
-// Fetch all events
+//worker view events
 const getEvents = async (req, res) => {
     try {
-        const events = await Event.find(); // Fetch all events from MongoDB
+        const workerId = req.user?.id; // Ensure worker's ID is available from authentication
+
+        // console.log(workerId);
+        if (!workerId) {
+            return res.status(403).json({ message: "Unauthorized access" });
+        }
+
+        const events = await Event.find({ createdBy: workerId }); // Fetch events created by the logged-in worker
         res.status(200).json(events);
-        console.log(events);
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
+//supervisor view events
+const getSupervisorEvents = async (req, res) => {
+    try {
+        const supervisorId = req.user?.id; // Get logged-in supervisor's ID
+
+        if (!supervisorId) {
+            return res.status(403).json({ message: "Unauthorized access" });
+        }
+
+        // Find all workers created by this supervisor
+        const workers = await Worker.find({ createdBy: supervisorId }, "_id");
+
+        if (!workers.length) {
+            return res.status(404).json({ message: "No workers found under this supervisor" });
+        }
+
+        // Extract worker IDs from the result
+        const workerIds = workers.map(worker => worker._id);
+
+        // Fetch events created by these workers
+        const events = await Event.find({ createdBy: { $in: workerIds } });
+
+        res.status(200).json(events);
+    } catch (error) {
+        console.error("Error fetching supervisor events:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+
 
 // Supervisor: Approve the event (Changes status to "Scheduled")
 const approveEvent = async (req, res) => {
@@ -96,8 +137,9 @@ const updateParticipants = async (req, res) => {
 };
 
 // Routes
-router.get('/all', getEvents);
-router.post('/add', addEvent); // Worker adds an event
+router.get('/all', verifyWorker, getEvents);
+router.get("/view-events", verifySupervisor, getSupervisorEvents);
+router.post('/add', verifyWorker, addEvent); // Worker adds an event
 router.put('/approve/:eventId', approveEvent); // Supervisor approves the event
 router.put('/update-participants/:eventId', updateParticipants); // Worker updates participant count
 

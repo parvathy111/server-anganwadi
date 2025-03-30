@@ -100,9 +100,9 @@ const rejectOrder = async (req, res) => {
 
         if (!order) return res.status(404).json({ message: "Order not found" });
 
-        if (order.orderStatus !== "Pending") {
-            return res.status(400).json({ message: "Order is not pending approval" });
-        }
+        // if (order.orderStatus !== "Pending") {
+        //     return res.status(400).json({ message: "Order is not pending approval" });
+        // }
 
         order.orderStatus = "Rejected";
         await order.save();

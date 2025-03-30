@@ -75,4 +75,23 @@ router.post('/add', verifyWorker, upload.single("studentImage"), async (req, res
     }
 });
 
+
+// Worker views daily track entries for their own Anganwadi
+router.get("/view", verifyWorker, async (req, res) => {
+    try {
+        const anganwadiNo = req.user.anganwadiNo; // Get worker's assigned Anganwadi number from token
+
+        const dailyTracks = await DailyTrack.find({ anganwadiNo }).sort({ createdAt: -1 }); // Fetch records for worker's anganwadi, latest first
+
+        if (!dailyTracks.length) {
+            return res.status(404).json({ message: "No daily track entries found for your Anganwadi." });
+        }
+
+        res.status(200).json(dailyTracks);
+    } catch (error) {
+        console.error("Error fetching daily track entries:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+});
+
 module.exports = router;

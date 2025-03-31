@@ -3,7 +3,9 @@ const router = express.Router();
 const OrderStock = require('./order.model');
 const Anganwadi = require('../anganawadi/anganawadi.model');
 const Worker = require('../worker/worker.model'); // ✅ Added Worker model
+const AvailableStock = require("./availablestock.model");
 const { verifyWorker, verifySupervisor } = require('../../middlewares/authMiddleware');
+
 
 // ✅ Worker: Place a new order
 const createOrder = async (req, res) => {
@@ -182,6 +184,50 @@ const getSupervisorOrders = async (req, res) => {
     }
 };
 
+const completeOrder = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+
+        // Find the order in the OrderStock collection
+        const order = await OrderStock.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: "Order not found" });
+        }
+
+        // Move order details to AvailableStock collection
+        const availableStock = new AvailableStock({
+            name: order.productname,
+            quantity: order.quantity,
+            image: order.image,
+            anganwadiNo: order.anganwadiNo,
+            status: "Completed",
+        });
+
+        await availableStock.save(); // Save in AvailableStock
+
+        // Delete the order from OrderStock
+        await OrderStock.findByIdAndDelete(orderId);
+
+        res.json({ message: "Order marked as completed and moved to Available Stock" });
+    } catch (error) {
+        console.error("Error completing order:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+// ✅ Ensure completeOrder is exported correctly
+module.exports = {
+    createOrder,
+    getWorkerOrders,
+    approveOrder,
+    rejectOrder,
+    cancelOrder,
+    updateOrder,
+    getSupervisorOrders,
+    completeOrder,  // ✅ Make sure this is included
+};
+
+
 
 
 // ✅ Routes with authentication
@@ -192,6 +238,7 @@ router.put('/reject/:orderId', verifySupervisor, rejectOrder);
 router.get('/all', verifySupervisor, getSupervisorOrders); // ✅ Only supervisors can view all orders
 router.put('/update/:orderId', updateOrder);
 router.delete('/cancel/:orderId', cancelOrder); // Cancel & hard delete
+router.put('/complete/:orderId', completeOrder);
 
 
 module.exports = router;

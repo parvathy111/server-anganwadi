@@ -13,6 +13,7 @@ const vaccineRoutes = require('./api/worker/vaccine.controller');
 const orderRoutes = require('./api/worker/order.controller');
 const anganwadiRoutes = require('./api/anganawadi/anganawadi.controller');
 const dailyTrackRoutes = require('./api/worker/dailytrack.controller');
+const availableStockRoutes = require('./api/worker/availablestock.controller');
 
 const app = express();
 app.use(cors());
@@ -31,5 +32,6 @@ app.use('/orders', orderRoutes);
 app.use('/anganavadi', anganwadiRoutes);
 
 app.use('/dailytracks', dailyTrackRoutes);
+app.use('/worker-available-stock', availableStockRoutes);
 
 module.exports = app;

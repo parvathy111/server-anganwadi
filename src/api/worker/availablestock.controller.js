@@ -1,13 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const AvailableStock = require('./availablestock.model');
-const Worker = require('../worker/worker.model'); 
+const Worker = require('../worker/worker.model');
+const OrderStock = require('./order.model'); // Ensure correct path
 const { verifyWorker } = require('../../middlewares/authMiddleware');
 
-// ✅ Worker: View Available Stock in Their Anganwadi
+
+// ✅ Worker: View Available Stock in Their Anganwadi with itemId
 const getWorkerAvailableStock = async (req, res) => {
     try {
-        // Ensure the user is authenticated
         if (!req.user || !req.user.id) {
             return res.status(403).json({ message: "Unauthorized: Worker ID missing" });
         }
@@ -19,21 +20,77 @@ const getWorkerAvailableStock = async (req, res) => {
         }
 
         // Fetch available stock for the worker's anganwadi
-        const availableStock = await AvailableStock.find({ anganwadiNo: worker.anganwadiNo });
+        let availableStock = await AvailableStock.find({ anganwadiNo: worker.anganwadiNo });
 
-        // If no stock is found, return a message
         if (availableStock.length === 0) {
             return res.status(404).json({ message: "No available stock for your Anganwadi." });
         }
 
-        res.status(200).json(availableStock);
+        // Fetch itemIds from OrderStock table and update in AvailableStock
+        const updatedStock = await Promise.all(
+            availableStock.map(async (stockItem) => {
+                if (!stockItem.itemId) {  // Only update if itemId is missing
+                    const orderStock = await OrderStock.findOne({ productname: stockItem.name });
+                    if (orderStock) {
+                        await AvailableStock.findByIdAndUpdate(stockItem._id, { itemId: orderStock.itemid }, { new: true });
+                        return { ...stockItem.toObject(), itemId: orderStock.itemid };
+                    }
+                }
+                return stockItem.toObject();
+            })
+        );
+
+        // ✅ Merge stock items with the same itemId
+        const mergedStock = updatedStock.reduce((acc, stockItem) => {
+            const existingItem = acc.find(item => item.itemId === stockItem.itemId);
+
+            if (existingItem) {
+                existingItem.quantity += stockItem.quantity; // Sum quantities
+            } else {
+                acc.push(stockItem);
+            }
+
+            return acc;
+        }, []);
+
+        res.status(200).json(mergedStock);
     } catch (error) {
         console.error("Get Worker Available Stock Error:", error);
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
-// ✅ Route for worker to view their available stock
+
+// ✅ Update stock quantity
+const updateAvailableStock = async (req, res) => {
+    try {
+        const { quantity } = req.body;
+        const { id } = req.params;
+
+        if (!quantity || quantity < 0) {
+            return res.status(400).json({ message: "Invalid quantity provided" });
+        }
+
+        const updatedStock = await AvailableStock.findByIdAndUpdate(
+            id,
+            { quantity },
+            { new: true }
+        );
+
+        if (!updatedStock) {
+            return res.status(404).json({ message: "Stock item not found" });
+        }
+
+        res.json({ message: "Stock updated successfully", updatedStock });
+    } catch (error) {
+        console.error("Update Stock Error:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
+    }
+};
+
+// ✅ Route for worker to view their available stock with itemId
 router.get('/available-stock', verifyWorker, getWorkerAvailableStock);
+router.put("/update-stock/:id", verifyWorker, updateAvailableStock);
 
 module.exports = router;
+

@@ -7,6 +7,7 @@ const availableStockSchema = new mongoose.Schema(
     image: { type: String, required: true },
     anganwadiNo: { type: String, required: true },
     status: { type: String, default: "Completed" }, // Default status is 'Completed'
+    itemId: { type: String, required: true }, // Reference to OrderStock
   },
   { timestamps: true } // Automatically adds createdAt and updatedAt
 );

@@ -194,26 +194,37 @@ const completeOrder = async (req, res) => {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        // Move order details to AvailableStock collection
-        const availableStock = new AvailableStock({
-            name: order.productname,
-            quantity: order.quantity,
-            image: order.image,
-            anganwadiNo: order.anganwadiNo,
-            status: "Completed",
-        });
+        // Check if an item with the same itemId already exists in AvailableStock
+        let existingStock = await AvailableStock.findOne({ itemId: order.itemid });
 
-        await availableStock.save(); // Save in AvailableStock
+        if (existingStock) {
+            // If item exists, update the quantity
+            existingStock.quantity += order.quantity;
+            await existingStock.save();
+        } else {
+            // If item does not exist, create a new entry
+            const availableStock = new AvailableStock({
+                name: order.productname,
+                quantity: order.quantity,
+                image: order.image,
+                anganwadiNo: order.anganwadiNo,
+                status: "Completed",
+                itemId: order.itemid,
+            });
+
+            await availableStock.save();
+        }
 
         // Delete the order from OrderStock
         await OrderStock.findByIdAndDelete(orderId);
 
-        res.json({ message: "Order marked as completed and moved to Available Stock" });
+        res.json({ message: "Order marked as completed. Stock updated successfully." });
     } catch (error) {
         console.error("Error completing order:", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
 };
+
 
 // ✅ Ensure completeOrder is exported correctly
 module.exports = {
@@ -225,7 +236,7 @@ module.exports = {
     updateOrder,
     getSupervisorOrders,
     completeOrder,  // ✅ Make sure this is included
-};
+};  
 
 
 

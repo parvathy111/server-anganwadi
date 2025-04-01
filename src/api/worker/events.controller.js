@@ -108,39 +108,88 @@ const approveEvent = async (req, res) => {
     }
 };
 
-// Worker: Update Participant_no after event completion
-const updateParticipants = async (req, res) => {
+const updateEventDetails = async (req, res) => {
     try {
         const { eventId } = req.params;
-        const { participantCount } = req.body;
+        
 
-        if (typeof participantCount !== 'number' || participantCount < 0) {
-            return res.status(400).json({ message: 'Invalid participant number' });
-        }
+       
 
+        // Validate event ID
         const event = await Event.findById(eventId);
         if (!event) {
-            return res.status(404).json({ message: 'Event not found' });
+            return res.status(404).json({ message: "Event not found" });
         }
 
-        if (event.status !== 'Completed') {
-            return res.status(400).json({ message: 'Event must be completed to update participants' });
+      
+
+        // Update the event using findByIdAndUpdate
+        const updatedEvent = await Event.findByIdAndUpdate(
+            eventId,
+            { $set: req.body },
+            { new: true, runValidators: true } // Return updated event and validate fields
+        );
+        
+
+        if (!updatedEvent) {
+            return res.status(500).json({ message: "Event update failed" });
         }
 
-        event.participantCount = participantCount;
-        await event.save();
-
-        res.status(200).json({ message: 'Participant number updated successfully', event });
+        res.status(200).json({ message: "Event details updated successfully", event: updatedEvent });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
+        console.error("Error updating event:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
+// 🗑️ Async function for deleting an event
+const deleteEvent = async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      // Check if the event exists
+      const event = await Event.findById(id);
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+  
+      // Delete the event from the database
+      await Event.findByIdAndDelete(id);
+  
+      res.status(200).json({ message: "Event deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+  };
+
+  const completeEvent = async (req, res) => {
+    try {
+      const event = await Event.findById(req.params.id);
+  
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+  
+      // Update the status to 'Completed'
+      event.status = "Completed";
+      await event.save();
+  
+      res.status(200).json({ message: "Event marked as completed", event });
+    } catch (error) {
+      console.error("Error updating event status:", error);
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+  };
+
 // Routes
+
+router.delete("/:id", deleteEvent);
 router.get('/all', verifyWorker, getEvents);
 router.get("/view-events", verifySupervisor, getSupervisorEvents);
 router.post('/add', verifyWorker, addEvent); // Worker adds an event
 router.put('/approve/:eventId', approveEvent); // Supervisor approves the event
-router.put('/update-participants/:eventId', updateParticipants); // Worker updates participant count
+router.put("/update/:eventId", updateEventDetails);
+router.put("/complete/:id", completeEvent);
 
 module.exports = router;

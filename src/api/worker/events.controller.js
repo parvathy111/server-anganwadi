@@ -8,11 +8,9 @@ const { verifyWorker, verifySupervisor } = require('../../middlewares/authMiddle
 
 const addEvent = async (req, res) => {
     try {
-        // console.log(req.body);
         const { eventName, participants, date, time, conductedBy, anganwadiNo } = req.body;
         const workerId = req.user.id; // Assuming worker's ID is stored in `req.user` after authentication
 
-        console.log(workerId);
         // Validate required fields
         if (![eventName, date, time, conductedBy, anganwadiNo].every(Boolean)) {
             return res.status(400).json({ message: 'All fields are required' });
@@ -42,7 +40,6 @@ const getEvents = async (req, res) => {
     try {
         const workerId = req.user?.id; // Ensure worker's ID is available from authentication
 
-        // console.log(workerId);
         if (!workerId) {
             return res.status(403).json({ message: "Unauthorized access" });
         }

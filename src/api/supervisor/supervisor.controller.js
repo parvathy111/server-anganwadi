@@ -1,4 +1,3 @@
-
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -63,8 +62,6 @@ router.post('/createsupervisor', verifyAdmin, async (req, res) => {
             email,
             password: randomPassword
         });
-
-        console.log(`Generated Password for Supervisor: ${randomPassword}`);
 
         await newSupervisor.save();
 

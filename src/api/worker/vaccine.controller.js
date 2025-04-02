@@ -67,7 +67,6 @@ const getAllVaccines = async (req, res) => {
 const getVaccinatedUsers = async (req, res) => {
     try {
         const { vaccineId } = req.params;
-        console.log(vaccineId);
         
         const vaccine = await Vaccine.findById(vaccineId );
         if (!vaccine) return res.status(404).json({ status: 'error', message: 'Vaccine not found' });

@@ -10,7 +10,6 @@ const { verifyWorker, verifySupervisor } = require('../../middlewares/authMiddle
 // ✅ Worker: Place a new order
 const createOrder = async (req, res) => {
     try {
-        console.log("Request Body:", req.body);
 
         const { productname, itemid, quantity, anganwadiNo, image } = req.body;
 

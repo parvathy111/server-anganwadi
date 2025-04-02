@@ -33,10 +33,6 @@ const upload = multer({ storage, fileFilter });
 router.post('/add', verifyWorker, upload.single("studentImage"), async (req, res) => {
     try {
         const { openingTime, closingTime, noOfPresents, noOfAbsents, todayMeal, topicLearned, otherActivities } = req.body;
-        
-        // Log request data
-        console.log("Request Body:", req.body);
-        console.log("Uploaded File:", req.file);
 
         if (!openingTime || !closingTime || !noOfPresents || !noOfAbsents || !todayMeal || !topicLearned) {
             return res.status(400).json({ message: 'All required fields must be provided' });

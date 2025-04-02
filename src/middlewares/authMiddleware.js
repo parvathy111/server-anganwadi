@@ -28,7 +28,6 @@ const verifyAdmin = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(decoded);
         const admin = await Admin.findById(decoded.id);
         if (!admin) {
             return res.status(403).json({ message: 'Only admins can perform this action' });
@@ -54,7 +53,6 @@ const verifySupervisor = (req, res, next) => {
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded; // THIS MUST SET req.
-        console.log(decoded);
         next();
     } catch (err) {
         return res.status(401).json({ message: 'Token invalid' });
@@ -65,18 +63,13 @@ const verifySupervisor = (req, res, next) => {
 const verifyWorker = async (req, res, next) => {
     try {
         const authHeader = req.header('Authorization');
-        // console.log(authHeader);
         const token = authHeader.split(" ").pop();
-        console.log(token);
         if (!token) {
             return res.status(403).json({ message: 'Access denied, no token provided' });
         }
 
-        // console.log(token)
-
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(decoded);
         const worker = await Worker.findById(decoded.id);
         if (!worker) {
             return res.status(403).json({ message: 'Only supervisors can perform this action' });

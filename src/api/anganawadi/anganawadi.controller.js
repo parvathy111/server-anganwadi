@@ -10,10 +10,6 @@ const createAnganwadi = async (req, res) => {
         const { anganwadiNo, localBody, localBodyName, wardNumber } = req.body;
         const supervisorId = req.user?.id; // Extracted from authenticated user (Supervisor)
 
-        console.log(req.user);
-
-        console.log("Supervisor from request:", supervisorId);
-
         if (!supervisorId) {
             return res.status(403).json({ message: 'Unauthorized: Supervisor ID missing' });
         }

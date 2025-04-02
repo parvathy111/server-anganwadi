@@ -8,8 +8,6 @@ const Worker = require('../worker/worker.model');
 // Controller function to add a product
 const addProduct = async (req, res) => {
     try {
-        console.log("Request Body:", req.body);
-        
         const { itemid, productname, image } = req.body;
 
         // Ensure the request has the supervisor ID

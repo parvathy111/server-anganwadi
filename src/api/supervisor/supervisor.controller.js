@@ -2,8 +2,13 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
-const Supervisor = require('./supervisor.model');
-const { verifyAdmin, verifySupervisor } = require('../../middlewares/authMiddleware');
+const Supervisor = require('./supervisor.model'); 
+
+const Worker = require('../worker/worker.model');
+const Parent = require('../beneficiaries/beneficiaries.model');
+const PregLac = require('../beneficiaries/beneficiaries.model');
+
+const { verifyAdmin, verifySupervisor, verifyWorker } = require('../../middlewares/authMiddleware');
 const { sendWelcomeEmail } = require('../../utils/email');
 
 const router = express.Router();
@@ -75,34 +80,35 @@ router.post('/createsupervisor', verifyAdmin, async (req, res) => {
 });
 
 // Supervisor can update password
-router.post('/updatesupervisor', verifySupervisor, async (req, res) => {
+
+router.post('/changepassword', verifySupervisor, async (req, res) => {
     try {
-        const supervisorId = req.user.id; // getting from verifySupervisor middleware
+        const supervisorId = req.user.id; // Getting from verifySupervisor middleware
         const supervisor = await Supervisor.findById(supervisorId);
 
         if (!supervisor) {
             return res.status(404).json({ message: 'Supervisor not found' });
         }
 
-        // Handle password update separately
-        if (req.body.password) {
-            supervisor.password = req.body.password; // this will trigger pre('save') to hash it
-            delete req.body.password; // remove from req.body to avoid accidental overwrite below
+        const { oldPassword, newPassword } = req.body; // Extract old and new password
+
+        // Check if the old password is correct
+        const isMatch = await bcrypt.compare(oldPassword, supervisor.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Incorrect old password' });
         }
 
-        // Update other fields dynamically
-        Object.assign(supervisor, req.body);
 
-        await supervisor.save();
+        // Update the password
+       supervisor.password = newPassword
+       await supervisor.save()
 
-        res.json({ message: 'Supervisor profile updated successfully', supervisor });
+        res.json({ message: 'Password updated successfully' });
     } catch (error) {
-        console.error("Error updating supervisor:", error);
+        console.error("Error updating password:", error);
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 });
-
-
 
 
 
@@ -136,8 +142,124 @@ router.delete("/delete/:id", async (req, res) => {
 });
 
 
+// Update Profile for Supervisor, Worker, Parent, PregLac
+const updateUserProfile = async (req, res) => {
+    try {
+        const { userType } = req.params;
+        const { fullname, name, localBody, gender, address, phone, anganwadiNo, childname, fathername, mothername, dob, prevNumPreg, deliveryDate } = req.body;
+
+        let userModel;
+
+        // Select the appropriate model
+        switch (userType) {
+            case 'supervisor':
+                userModel = Supervisor;
+                break;
+            case 'worker':
+                userModel = Worker;
+                break;
+            case 'parent':
+                userModel = Parent;
+                break;
+            case 'preglac':
+                userModel = PregLac;
+                break;
+            default:
+                return res.status(400).json({ message: 'Invalid user type' });
+        }
+
+        // Fetch user data
+        const user = await userModel.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: `${userType} not found` });
+        }
+
+        // Update common fields
+        if (fullname) {
+            user.fullname = fullname;
+        } else if (name) {
+            user.name = name;
+        }
+        if (gender) user.gender = gender;
+        if (address) user.address = address;
+        if (phone) user.phone = phone;
+        if (localBody) user.localBody = localBody;
+       
+
+        // Update userType-specific fields
+        if (userType === 'worker' || userType === 'parent' || userType === 'preglac') {
+            if (anganwadiNo) user.anganwadiNo = anganwadiNo;
+        }
+
+        if (userType === 'parent' || userType === 'worker') {
+            if (dob) {
+                
+                user.dob = new Date(dob);  // Convert string to Date object
+            }
+        }
+
+        if (userType === 'parent') {
+            if (childname) user.childname = childname;
+            if (fathername) user.fathername = fathername;
+            if (mothername) user.mothername = mothername;
+            if (dob) user.dob = dob;
+        }
+        if (userType === 'preglac') {
+            if (prevNumPreg) user.prevNumPreg = prevNumPreg;
+            if (deliveryDate) user.deliveryDate = deliveryDate;
+        }
+
+        // Save updated data
+        await user.save();
+        
+        res.status(200).json({ message: 'Profile updated successfully', user });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+module.exports = { updateUserProfile };
+
+
+const getUserProfile = async (req, res) => {
+    try {
+        const { userType } = req.params;
+        let userModel;
+
+        switch (userType) {
+            case 'supervisor':
+                userModel = Supervisor;
+                break;
+            case 'worker':
+                userModel = Worker;
+                break;
+            case 'parent':
+                userModel = Parent;
+                break;
+            case 'preglac':
+                userModel = PregLac;
+                break;
+            default:
+                return res.status(400).json({ message: 'Invalid user type' });
+        }
+
+        const user = await userModel.findById(req.user.id);
+     
+        if (!user) {
+            return res.status(404).json({ message: `${userType} profile not found` });
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
 // other routes
 router.use(AnganawadiRoutes);
 router.post('/addProduct', verifySupervisor, addProduct);
+// router.put('/edit-profile', verifySupervisor, updateSupervisorProfile);
+router.put('/edit-profile/:userType', verifySupervisor, updateUserProfile);
+router.get('/profile/:userType', verifySupervisor, getUserProfile);
 
 module.exports = router;

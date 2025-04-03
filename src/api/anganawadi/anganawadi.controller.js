@@ -8,6 +8,7 @@ const router = express.Router();
 const createAnganwadi = async (req, res) => {
     try {
         const { anganwadiNo, localBody, localBodyName, wardNumber } = req.body;
+   
         const supervisorId = req.user?.id; // Extracted from authenticated user (Supervisor)
 
         if (!supervisorId) {
@@ -15,6 +16,7 @@ const createAnganwadi = async (req, res) => {
         }
 
         // Check if Anganwadi already exists
+        
         const existingAnganwadi = await Anganwadi.findOne({ anganwadiNo: anganwadiNo.trim().toLowerCase() });
         if (existingAnganwadi) {
             return res.status(400).json({ message: 'Anganwadi already exists' });

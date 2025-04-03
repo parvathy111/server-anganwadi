@@ -82,30 +82,7 @@ router.post('/createworker', verifySupervisor, async (req, res) => {
     }
 });
 
-// 🔹 Update Worker Profile (Only the logged-in worker can update their own profile)
-router.put('/updateworker', verifyWorker, async (req, res) => {
-    try {
-        const workerId = req.user.id;
-        const worker = await Worker.findById(workerId);
 
-        if (!worker) {
-            return res.status(404).json({ message: 'Worker not found' });
-        }
-
-        // Update worker details (only allow safe fields to be updated)
-        const { name, phone, address } = req.body;
-        if (name) worker.name = name;
-        if (phone) worker.phone = phone;
-        if (address) worker.address = address;
-
-        await worker.save();
-
-        res.json({ message: 'Worker profile updated successfully', worker });
-    } catch (error) {
-        console.error("Error updating worker:", error);
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
-});
 
 // 🔹 Fetch All Workers (Only the supervisor who created them can view them)
 const getAllWorkers = async (req, res) => {
@@ -163,5 +140,36 @@ router.get("/me", verifyWorker, async (req, res) => {
       res.status(500).json({ message: "Server error" });
     }
   });
+
+
+  // Worker can update password
+router.post('/changepassword', verifyWorker, async (req, res) => {
+    try {
+        const workerId = req.user.id; // Getting worker ID from middleware
+        const worker = await Worker.findById(workerId);
+
+        if (!worker) {
+            return res.status(404).json({ message: 'Worker not found' });
+        }
+
+        const { oldPassword, newPassword } = req.body;
+
+        // Check if the old password is correct
+        const isMatch = await bcrypt.compare(oldPassword, worker.password);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Incorrect old password' });
+        }
+
+        // Update the password
+        worker.password = newPassword
+        await worker.save()
+
+        res.json({ message: 'Password updated successfully' });
+    } catch (error) {
+        console.error("Error updating password:", error);
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+});
+
 
 module.exports = router;

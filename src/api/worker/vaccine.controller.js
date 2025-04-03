@@ -78,6 +78,48 @@ const getVaccinatedUsers = async (req, res) => {
     }
 }
 
+
+// Edit a vaccine by ID
+const editVaccine = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updatedData = req.body;
+
+        // Find and update the vaccine
+        const updatedVaccine = await Vaccine.findByIdAndUpdate(id, updatedData, { new: true });
+
+        if (!updatedVaccine) {
+            return res.status(404).json({ message: "Vaccine not found" });
+        }
+
+        res.status(200).json(updatedVaccine);
+    } catch (error) {
+        console.error("Error updating vaccine:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+const deleteVaccine = async (req, res) => {
+    try {
+      const vaccine = await Vaccine.findById(req.params.id);
+      if (!vaccine) {
+        return res.status(404).json({ message: "Vaccine not found" });
+      }
+  
+      await Vaccine.findByIdAndDelete(req.params.id);
+      res.json({ message: "Vaccine deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting vaccine:", error);
+      res.status(500).json({ message: "Server error while deleting vaccine" });
+    }
+  };
+  
+
+
+
+router.delete("/delete/:id", deleteVaccine);
+router.put("/:id", editVaccine);
+
 router.get('/', verifyWorker, getAllVaccines);
 
 router.post('/add', verifyWorker, addVaccine);
@@ -85,4 +127,4 @@ router.post('/add', verifyWorker, addVaccine);
 router.post('/getvaccinatedusers/:vaccineId', getVaccinatedUsers);
 module.exports = router;
 
-// module.exports = exports;
+

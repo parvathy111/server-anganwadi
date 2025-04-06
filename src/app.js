@@ -14,6 +14,8 @@ const orderRoutes = require('./api/worker/order.controller');
 const anganwadiRoutes = require('./api/anganawadi/anganawadi.controller');
 const dailyTrackRoutes = require('./api/worker/dailytrack.controller');
 const availableStockRoutes = require('./api/worker/availablestock.controller');
+const messageRoutes = require('./api/supervisor/message.controller');
+const authRoutes = require('./api/auth/auth.controller');
 
 const app = express();
 app.use(cors());
@@ -33,5 +35,9 @@ app.use('/anganavadi', anganwadiRoutes);
 
 app.use('/dailytracks', dailyTrackRoutes);
 app.use('/worker-available-stock', availableStockRoutes);
+
+app.use('/messages', messageRoutes);
+
+app.use('/auth', authRoutes);
 
 module.exports = app;

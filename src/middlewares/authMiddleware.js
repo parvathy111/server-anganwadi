@@ -6,8 +6,11 @@ const { Parent } = require('../api/beneficiaries/beneficiaries.model');
 
 
 const auth = (req, res, next) => {
-    const token = req.header('Authorization');
-    if (!token) return res.status(401).json({ message: 'Access Denied' });
+    const authHeader = req.header('Authorization');
+    const token = authHeader.split(" ").pop();
+    if (!token) {
+        return res.status(403).json({ message: 'Access denied, no token provided' });
+    }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -94,14 +97,15 @@ const verifyBeneficiary = async (req, res, next) => {
 
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log(decoded)
+       
         if (decoded.role == 'Parent'){
             const parent = await Parent.findById(decoded.userId)
             if (!parent) {
                 return res.status(403).json({ message: 'Only parent can perform this action' });
             }
             
-           const user = {...parent, role:'Parent'}
+            const user = { ...parent.toObject(), role: 'Parent' };
+          
             req.user = user;
         }
 

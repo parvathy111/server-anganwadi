@@ -118,16 +118,15 @@ const deleteVaccine = async (req, res) => {
 
   const getVaccinesByAnganwadiAndRole = async (req, res) => {
     const { anganwadiNo, role } = req.user;
-  
-    console.log(anganwadiNo)
-    console.log(role)
+ 
+   
     try {
       const vaccines = await Vaccine.find({
         anganwadiNo,
         vaccineeRole: role
       });
   
-      console.log(vaccines)
+  
       res.status(200).json(vaccines);
     } catch (err) {
       console.error('Error fetching vaccines:', err);

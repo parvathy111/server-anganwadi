@@ -131,7 +131,7 @@ const loginBeneficiary = async (req, res) => {
         }
 
         if (user.status !== "Active") {
-            return res.status(403).json({ message: "Your account is not active. Please contact the admin." });
+            return res.status(403).json({ message: "Your account is not active. Please contact the Anganawadi Worker." });
         }
 
         const token = jwt.sign(

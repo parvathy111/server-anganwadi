@@ -1,3 +1,4 @@
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
@@ -10,6 +11,11 @@ const supervisorSchema = new mongoose.Schema({
     localBody: {
         type: String,
         required: true
+    },
+    localbodyName: {           // 👈 New field added
+        type: String,
+        required: true,
+        trim: true
     },
     gender: {
         type: String,
@@ -47,8 +53,6 @@ supervisorSchema.pre('save', async function (next) {
         next(error);
     }
 });
-
-
 
 const Supervisor = mongoose.model('Supervisor', supervisorSchema);
 

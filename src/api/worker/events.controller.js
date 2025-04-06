@@ -3,7 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const Event = require('./events.model'); // Import the Event model
 const Worker = require('./worker.model'); 
-const { verifyWorker, verifySupervisor } = require('../../middlewares/authMiddleware');
+const { verifyWorker, verifySupervisor, verifyBeneficiary } = require('../../middlewares/authMiddleware');
 
 
 const addEvent = async (req, res) => {
@@ -179,6 +179,32 @@ const deleteEvent = async (req, res) => {
     }
   };
 
+
+  // GET /vaccines/beneficiary-events?anganwadiNo=ANG001&role=Mother
+const getEventsForBeneficiary = async (req, res) => {
+    const { anganwadiNo, role } = req.user;
+  
+    console.log('Anganwadi No:', anganwadiNo);
+    console.log('Role:', role);
+  
+    try {
+      const events = await Event.find({
+        anganwadiNo,
+        participants: { $in: [role] },
+        status: { $ne: 'Cancelled' }
+      }).sort({ date: -1 });
+  
+      console.log('Fetched Events:', events);
+  
+      res.status(200).json(events);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+      res.status(500).json({ error: 'Failed to fetch events' });
+    }
+  };
+  
+  module.exports = { getEventsForBeneficiary };
+
 // Routes
 
 router.delete("/:id", deleteEvent);
@@ -188,5 +214,7 @@ router.post('/add', verifyWorker, addEvent); // Worker adds an event
 router.put('/approve/:eventId', approveEvent); // Supervisor approves the event
 router.put("/update/:eventId", updateEventDetails);
 router.put("/complete/:id", completeEvent);
+router.get('/beneficiary-events', verifyBeneficiary, getEventsForBeneficiary);
+
 
 module.exports = router;

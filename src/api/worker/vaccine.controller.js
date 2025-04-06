@@ -1,7 +1,7 @@
 const Vaccine = require('./vaccine.model');
 const mongoose = require('mongoose');
 const express = require('express');
-const { verifyWorker } = require('../../middlewares/authMiddleware');
+const { verifyWorker, verifyBeneficiary } = require('../../middlewares/authMiddleware');
 const router = express.Router();
 
 
@@ -116,6 +116,27 @@ const deleteVaccine = async (req, res) => {
   
 
 
+  const getVaccinesByAnganwadiAndRole = async (req, res) => {
+    const { anganwadiNo, role } = req.user;
+  
+    console.log(anganwadiNo)
+    console.log(role)
+    try {
+      const vaccines = await Vaccine.find({
+        anganwadiNo,
+        vaccineeRole: role
+      });
+  
+      console.log(vaccines)
+      res.status(200).json(vaccines);
+    } catch (err) {
+      console.error('Error fetching vaccines:', err);
+      res.status(500).json({ error: 'Failed to fetch vaccines' });
+    }
+  };
+  
+  // Using the named function in the route
+  router.get('/getvaccine',verifyBeneficiary, getVaccinesByAnganwadiAndRole);
 
 router.delete("/delete/:id", deleteVaccine);
 router.put("/:id", editVaccine);

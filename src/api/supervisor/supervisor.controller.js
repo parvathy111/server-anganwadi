@@ -45,11 +45,14 @@ router.post('/login', async (req, res) => {
 });
 
 // Route to add a supervisor (Only Admin can add)
+// 
+
 router.post('/createsupervisor', verifyAdmin, async (req, res) => {
     try {
-        const { fullname, localBody, gender, address, phone, email } = req.body;
-        const existingSupervisor = await Supervisor.findOne({ email });
+        const { fullname, localBody, localbodyName, gender, address, phone, email } = req.body;
 
+        // Check if the supervisor already exists
+        const existingSupervisor = await Supervisor.findOne({ email });
         if (existingSupervisor) {
             return res.status(400).json({ message: 'Supervisor already exists' });
         }
@@ -57,10 +60,11 @@ router.post('/createsupervisor', verifyAdmin, async (req, res) => {
         // Generate a random password
         const randomPassword = generateRandomPassword();
 
-        // Create new supervisor
+        // Create a new supervisor with the new field
         const newSupervisor = new Supervisor({
             fullname,
             localBody,
+            localbodyName, // 👈 Add this line
             gender,
             address,
             phone,
@@ -75,6 +79,7 @@ router.post('/createsupervisor', verifyAdmin, async (req, res) => {
 
         res.status(201).json({ message: 'Supervisor created successfully' });
     } catch (error) {
+        console.error("Error creating supervisor:", error);
         res.status(500).json({ message: 'Server error', error });
     }
 });

@@ -172,4 +172,30 @@ router.post('/changepassword', verifyWorker, async (req, res) => {
 });
 
 
+// GET /worker/:workerId/supervisor - fetch assigned supervisor
+router.get("/:workerId/supervisor", async (req, res) => {
+    try {
+      const { workerId } = req.params;
+  
+      const worker = await Worker.findById(workerId).populate("createdBy");
+  
+      if (!worker) {
+        return res.status(404).json({ message: "Worker not found" });
+      }
+  
+      const supervisor = worker.createdBy;
+  
+      if (!supervisor) {
+        return res.status(404).json({ message: "Supervisor not assigned" });
+      }
+  
+      res.json({ data: supervisor });
+    } catch (err) {
+      console.error("Error fetching supervisor:", err);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+  
+
+
 module.exports = router;

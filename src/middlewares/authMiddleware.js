@@ -3,7 +3,7 @@ const Admin = require('../api/admin/admin.model');
 const Supervisor = require('../api/supervisor/supervisor.model');
 const Worker = require('../api/worker/worker.model');
 const { Parent } = require('../api/beneficiaries/beneficiaries.model');
-
+const { PregLactWomen } = require('../api/beneficiaries/beneficiaries.model');
 
 const auth = (req, res, next) => {
     const authHeader = req.header('Authorization');

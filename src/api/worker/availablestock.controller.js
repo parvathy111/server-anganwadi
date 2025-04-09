@@ -3,7 +3,7 @@ const router = express.Router();
 const AvailableStock = require('./availablestock.model');
 const Worker = require('../worker/worker.model');
 const OrderStock = require('./order.model'); // Ensure correct path
-const { verifyWorker } = require('../../middlewares/authMiddleware');
+const { verifyWorker, verifyBeneficiary } = require('../../middlewares/authMiddleware');
 
 
 // ✅ Worker: View Available Stock in Their Anganwadi with itemId
@@ -88,7 +88,30 @@ const updateAvailableStock = async (req, res) => {
     }
 };
 
+
+
+// Async function stored in a variable
+const getAvailableStockByAnganwadiNo = async (req, res) => {
+    const { anganwadiNo } = req.params;
+    // console.log("Backend anganwadiNo:", anganwadiNo);
+  
+    try {
+      const stock = await AvailableStock.find({
+        anganwadiNo,
+        quantity: { $gt: 0 },
+      });
+  
+    //   console.log("Stock found:", stock);
+      res.status(200).json(stock);
+    } catch (error) {
+      console.error("Error fetching stock:", error);
+      res.status(500).json({ message: "Server error while fetching stock." });
+    }
+  };
+
+
 // ✅ Route for worker to view their available stock with itemId
+router.get("/:anganwadiNo", getAvailableStockByAnganwadiNo);
 router.get('/available-stock', verifyWorker, getWorkerAvailableStock);
 router.put("/update-stock/:id", verifyWorker, updateAvailableStock);
 

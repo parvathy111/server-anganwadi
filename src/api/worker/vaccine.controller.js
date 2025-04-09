@@ -133,9 +133,52 @@ const deleteVaccine = async (req, res) => {
       res.status(500).json({ error: 'Failed to fetch vaccines' });
     }
   };
+
+
+
+  // PUT /vaccines/complete/:id
+  const markVaccineCompleted = async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user._id; // coming from auth middleware
+    const userRole = req.user.role; // 'Parent' or 'PregLactWomen'
   
-  // Using the named function in the route
-  router.get('/getvaccine',verifyBeneficiary, getVaccinesByAnganwadiAndRole);
+    try {
+      const vaccine = await Vaccine.findById(id);
+      if (!vaccine) {
+        return res.status(404).json({ message: "Vaccine not found" });
+      }
+  
+      // Only allow if role matches
+      if (vaccine.vaccineeRole !== userRole) {
+        return res.status(403).json({ message: "Access denied for your role" });
+      }
+  
+      const alreadyCompleted = vaccine.completedPersons.some((personId) =>
+        personId.toString() === userId.toString()
+      );
+  
+      if (!alreadyCompleted) {
+        vaccine.completedPersons.push(userId);
+        await vaccine.save();
+      }
+  
+      res.status(200).json({ message: "Marked as completed", vaccine });
+    } catch (error) {
+      console.error("Error marking as completed:", error);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  };
+  
+  module.exports = { markVaccineCompleted };
+  
+  
+  
+  // Assign it to the route
+  router.put('/complete/:id', verifyBeneficiary, markVaccineCompleted);
+  
+  
+ // Using the named function in the route
+router.get('/getvaccine',verifyBeneficiary, getVaccinesByAnganwadiAndRole);
 
 router.delete("/delete/:id", deleteVaccine);
 router.put("/:id", editVaccine);

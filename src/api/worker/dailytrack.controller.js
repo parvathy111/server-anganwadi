@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
         cb(null, "uploads/"); // Save files in 'uploads' directory
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + "-" + file.originalname); // Unique filename
+        cb(null, req._id); // Unique filename
     },
 });
 
@@ -30,7 +30,7 @@ const upload = multer({ storage, fileFilter });
 
 
 // Add a new DailyTrack entry
-router.post('/add', verifyWorker, upload.single("studentImage"), async (req, res) => {
+router.post('/add', verifyWorker, async (req, res) => {
     try {
         const { openingTime, closingTime, noOfPresents, noOfAbsents, todayMeal, topicLearned, otherActivities } = req.body;
 
@@ -63,6 +63,7 @@ router.post('/add', verifyWorker, upload.single("studentImage"), async (req, res
             otherActivities
         });
 
+        upload.single("studentImage")({...req,_id : newDailyTrack._id })
         await newDailyTrack.save();
         res.status(201).json({ message: 'Daily track entry added successfully', dailyTrack: newDailyTrack });
 
@@ -91,3 +92,4 @@ router.get("/view", verifyWorker, async (req, res) => {
 });
 
 module.exports = router;
+

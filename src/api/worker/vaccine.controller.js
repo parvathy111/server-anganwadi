@@ -171,23 +171,36 @@ const deleteVaccine = async (req, res) => {
   
   module.exports = { markVaccineCompleted };
   
-  
-  
-  // Assign it to the route
-  router.put('/complete/:id', verifyBeneficiary, markVaccineCompleted);
-  
-  
- // Using the named function in the route
-router.get('/getvaccine',verifyBeneficiary, getVaccinesByAnganwadiAndRole);
 
+// GET /vaccines/:id - Get vaccine by ID with completed users
+const getVaccineById = async (req, res) => {
+  try {
+    const vaccine = await Vaccine.findById(req.params.id)
+      .populate('completedPersons'); // populate user details
+
+    if (!vaccine) {
+      return res.status(404).json({ message: 'Vaccine not found' });
+    }
+
+    res.json(vaccine);
+  } catch (error) {
+    console.error('Error fetching vaccine by ID:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+  
+ // Routes
+router.get('/getvaccine',verifyBeneficiary, getVaccinesByAnganwadiAndRole);
 router.delete("/delete/:id", deleteVaccine);
 router.put("/:id", editVaccine);
-
 router.get('/', verifyWorker, getAllVaccines);
-
 router.post('/add', verifyWorker, addVaccine);
-
 router.post('/getvaccinatedusers/:vaccineId', getVaccinatedUsers);
+router.put('/complete/:id', verifyBeneficiary, markVaccineCompleted);
+router.get('/:id', getVaccineById);
+
 module.exports = router;
 
 

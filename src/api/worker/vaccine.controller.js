@@ -135,7 +135,6 @@ const deleteVaccine = async (req, res) => {
   };
 
 
-
   // PUT /vaccines/complete/:id
   const markVaccineCompleted = async (req, res) => {
     const { id } = req.params;

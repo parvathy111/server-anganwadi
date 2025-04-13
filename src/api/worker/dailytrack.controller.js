@@ -38,6 +38,7 @@ router.post('/add', verifyWorker, async (req, res) => {
             return res.status(400).json({ message: 'All required fields must be provided' });
         }
 
+
         // Validate 12-hour time format (AM/PM)
         const timeRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9] (AM|PM)$/;
         if (!timeRegex.test(openingTime) || !timeRegex.test(closingTime)) {
@@ -63,7 +64,7 @@ router.post('/add', verifyWorker, async (req, res) => {
             otherActivities
         });
 
-        upload.single("studentImage")({...req,_id : newDailyTrack._id })
+        
         await newDailyTrack.save();
         res.status(201).json({ message: 'Daily track entry added successfully', dailyTrack: newDailyTrack });
 

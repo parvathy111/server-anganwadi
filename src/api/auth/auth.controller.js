@@ -8,19 +8,22 @@ const Supervisor = require('../../api/supervisor/supervisor.model');
 
 router.get('/me', auth, async (req, res) => {
   try {
-    const { userId, role } = req.user;
+    const { id, role } = req.user;
 
+   
     let userData;
 
     // Fetch from correct model based on role
     if (role === 'Parent') {
-      userData = await Parent.findById(userId);
+      userData = await Parent.findById(id);
     } else if (role === 'PregLactWomen') {
-      userData = await PregLactWomen.findById(userId);
-    } else if (role === 'Worker') {
-      userData = await Worker.findById(userId);
+      userData = await PregLactWomen.findById(id);
+    } else if (role === 'worker') {
+  
+      userData = await Worker.findById(id);
+   
     } else if (role === 'Supervisor') {
-      userData = await Supervisor.findById(userId);
+      userData = await Supervisor.findById(id);
     } else {
       return res.status(400).json({ message: 'Invalid role' });
     }
@@ -30,7 +33,7 @@ router.get('/me', auth, async (req, res) => {
     }
 
     res.json(userData);
-    // console.log("User sent from /auth/me:", userData);
+    
 
   } catch (error) {
     console.error("Error in /auth/me:", error);

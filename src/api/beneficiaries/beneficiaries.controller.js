@@ -135,7 +135,7 @@ const loginBeneficiary = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { userId: user._id, email: user.email, role },
+            { id: user._id, email: user.email, role },
             JWT_SECRET,
             { expiresIn: '1h' }
         );

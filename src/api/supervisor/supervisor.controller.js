@@ -5,8 +5,8 @@ const crypto = require('crypto');
 const Supervisor = require('./supervisor.model'); 
 
 const Worker = require('../worker/worker.model');
-const Parent = require('../beneficiaries/beneficiaries.model');
-const PregLac = require('../beneficiaries/beneficiaries.model');
+const { Parent } = require('../beneficiaries/beneficiaries.model');
+const { PregLactWomen } = require('../beneficiaries/beneficiaries.model');
 
 const { verifyAdmin, verifySupervisor, verifyWorker } = require('../../middlewares/authMiddleware');
 const { sendWelcomeEmail } = require('../../utils/email');
@@ -36,7 +36,7 @@ router.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid email or password' });
         }
 
-        const token = jwt.sign({ id: supervisor._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign({ id: supervisor._id, role:'Supervisor' }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         res.json({ token, message: 'Login successful' });
     } catch (error) {
@@ -167,7 +167,7 @@ const updateUserProfile = async (req, res) => {
                 userModel = Parent;
                 break;
             case 'preglac':
-                userModel = PregLac;
+                userModel = PregLactWomen;
                 break;
             default:
                 return res.status(400).json({ message: 'Invalid user type' });
@@ -242,14 +242,14 @@ const getUserProfile = async (req, res) => {
                 userModel = Parent;
                 break;
             case 'preglac':
-                userModel = PregLac;
+                userModel = PregLactWomen;
                 break;
             default:
                 return res.status(400).json({ message: 'Invalid user type' });
         }
 
         const user = await userModel.findById(req.user.id);
-     
+   
         if (!user) {
             return res.status(404).json({ message: `${userType} profile not found` });
         }

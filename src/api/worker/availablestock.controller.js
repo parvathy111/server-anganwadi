@@ -93,7 +93,6 @@ const updateAvailableStock = async (req, res) => {
 // Async function stored in a variable
 const getAvailableStockByAnganwadiNo = async (req, res) => {
     const { anganwadiNo } = req.params;
-    // console.log("Backend anganwadiNo:", anganwadiNo);
   
     try {
       const stock = await AvailableStock.find({
@@ -101,7 +100,6 @@ const getAvailableStockByAnganwadiNo = async (req, res) => {
         quantity: { $gt: 0 },
       });
   
-    //   console.log("Stock found:", stock);
       res.status(200).json(stock);
     } catch (error) {
       console.error("Error fetching stock:", error);

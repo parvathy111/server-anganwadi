@@ -10,10 +10,10 @@ const eventSchema = new mongoose.Schema(
             trim: true 
         },
 
-        participants: { 
-            type: [String], 
+        participantType: { 
+            type: String, 
             required: true 
-        }, // Array of participant names or IDs
+        }, 
         
         date: { 
             type: Date, 

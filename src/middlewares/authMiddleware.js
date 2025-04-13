@@ -102,7 +102,7 @@ const verifyBeneficiary = async (req, res, next) => {
         let user = null;
 
         if (decoded.role === 'Parent') {
-            const parent = await Parent.findById(decoded.userId);
+            const parent = await Parent.findById(decoded.id);
             if (!parent) {
                 return res.status(403).json({ message: 'Parent not found' });
             }
@@ -119,7 +119,7 @@ const verifyBeneficiary = async (req, res, next) => {
             };
 
         } else if (decoded.role === 'PregLactWomen') {
-            const pregLact = await PregLactWomen.findById(decoded.userId);
+            const pregLact = await PregLactWomen.findById(decoded.id);
             if (!pregLact) {
                 return res.status(403).json({ message: 'PregLactWomen not found' });
             }

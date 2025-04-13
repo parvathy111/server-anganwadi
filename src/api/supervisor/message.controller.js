@@ -5,7 +5,7 @@ const Message = require('./message.model');
 const sendMessage = async (req, res) => {
   const { sender, receiver, text } = req.body;
 
-  console.log("Incoming message payload:", { sender, receiver, text });
+  
 
   if (!sender || !receiver || !text) {
     return res.status(400).json({ success: false, message: 'Missing sender, receiver, or text' });
@@ -65,10 +65,8 @@ const getConversation = async (req, res) => {
 
   
   
-  // Use it in the route
-  router.get('/conversation/:user1/:user2', getConversation);
-  
-
+// Use it in the route
+router.get('/conversation/:user1/:user2', getConversation);
 router.post('/send', sendMessage);
 
 module.exports = router;

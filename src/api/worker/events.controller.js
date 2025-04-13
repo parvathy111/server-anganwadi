@@ -2,13 +2,13 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const Event = require('./events.model'); // Import the Event model
-const Worker = require('./worker.model'); 
+const Worker = require('./worker.model');
 const { verifyWorker, verifySupervisor, verifyBeneficiary } = require('../../middlewares/authMiddleware');
 
 
 const addEvent = async (req, res) => {
     try {
-        const { eventName, participants, date, time, conductedBy, anganwadiNo } = req.body;
+        const { eventName, participantType, date, time, conductedBy, anganwadiNo } = req.body;
         const workerId = req.user.id; // Assuming worker's ID is stored in `req.user` after authentication
 
         // Validate required fields
@@ -18,7 +18,7 @@ const addEvent = async (req, res) => {
 
         const newEvent = new Event({
             eventName,
-            participants: participants || [], // Default empty array if no participants
+            participantType: participantType || '', // Default empty array if no participants
             date,
             time,
             status: 'Pending Approval', // Default status
@@ -105,12 +105,10 @@ const approveEvent = async (req, res) => {
     }
 };
 
+//Update events
 const updateEventDetails = async (req, res) => {
     try {
         const { eventId } = req.params;
-        
-
-       
 
         // Validate event ID
         const event = await Event.findById(eventId);
@@ -118,15 +116,13 @@ const updateEventDetails = async (req, res) => {
             return res.status(404).json({ message: "Event not found" });
         }
 
-      
-
         // Update the event using findByIdAndUpdate
         const updatedEvent = await Event.findByIdAndUpdate(
             eventId,
             { $set: req.body },
             { new: true, runValidators: true } // Return updated event and validate fields
         );
-        
+
 
         if (!updatedEvent) {
             return res.status(500).json({ message: "Event update failed" });
@@ -142,68 +138,90 @@ const updateEventDetails = async (req, res) => {
 // 🗑️ Async function for deleting an event
 const deleteEvent = async (req, res) => {
     try {
-      const { id } = req.params;
-  
-      // Check if the event exists
-      const event = await Event.findById(id);
-      if (!event) {
-        return res.status(404).json({ message: "Event not found" });
-      }
-  
-      // Delete the event from the database
-      await Event.findByIdAndDelete(id);
-  
-      res.status(200).json({ message: "Event deleted successfully" });
-    } catch (error) {
-      console.error("Error deleting event:", error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
+        const { id } = req.params;
 
-  const completeEvent = async (req, res) => {
+        // Check if the event exists
+        const event = await Event.findById(id);
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        // Delete the event from the database
+        await Event.findByIdAndDelete(id);
+
+        res.status(200).json({ message: "Event deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting event:", error);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+};
+
+const completeEvent = async (req, res) => {
     try {
-      const event = await Event.findById(req.params.id);
-  
-      if (!event) {
-        return res.status(404).json({ message: "Event not found" });
-      }
-  
-      // Update the status to 'Completed'
-      event.status = "Completed";
-      await event.save();
-  
-      res.status(200).json({ message: "Event marked as completed", event });
+        const event = await Event.findById(req.params.id);
+
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        // Update the status to 'Completed'
+        event.status = "Completed";
+        await event.save();
+
+        res.status(200).json({ message: "Event marked as completed", event });
     } catch (error) {
-      console.error("Error updating event status:", error);
-      res.status(500).json({ message: "Server error", error: error.message });
+        console.error("Error updating event status:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
     }
-  };
+};
 
 
-  // GET /vaccines/beneficiary-events?anganwadiNo=ANG001&role=Mother
+// GET /vaccines/beneficiary-events?anganwadiNo=ANG001&role=Mother
 const getEventsForBeneficiary = async (req, res) => {
     const { anganwadiNo, role } = req.user;
-  
-    console.log('Anganwadi No:', anganwadiNo);
-    console.log('Role:', role);
-  
+console.log(role)
     try {
-      const events = await Event.find({
-        anganwadiNo,
-        participants: { $in: [role] },
-        status: { $ne: 'Cancelled' }
-      }).sort({ date: -1 });
-  
-      console.log('Fetched Events:', events);
-  
-      res.status(200).json(events);
+        const events = await Event.find({
+            anganwadiNo,
+            participantType: role,
+            status: { $ne: 'Cancelled' }
+        }).sort({ date: -1 });
+
+        res.status(200).json(events);
     } catch (error) {
-      console.error('Error fetching events:', error);
-      res.status(500).json({ error: 'Failed to fetch events' });
+        console.error('Error fetching events:', error);
+        res.status(500).json({ error: 'Failed to fetch events' });
+    }
+};
+
+module.exports = { getEventsForBeneficiary };
+
+
+
+const rejectEvent = async (req, res) => {
+    try {
+      const eventId = req.params.id;
+  
+      const updatedEvent = await Event.findByIdAndUpdate(
+        eventId,
+        { status: 'Rejected' },
+        { new: true }
+      );
+  
+      if (!updatedEvent) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
+  
+      res.status(200).json({ message: 'Event rejected successfully', event: updatedEvent });
+    } catch (error) {
+      console.error('Error rejecting event:', error);
+      res.status(500).json({ message: 'Server error' });
     }
   };
   
-  module.exports = { getEventsForBeneficiary };
+  module.exports = {
+    rejectEvent,
+  };
 
 // Routes
 
@@ -215,6 +233,6 @@ router.put('/approve/:eventId', approveEvent); // Supervisor approves the event
 router.put("/update/:eventId", updateEventDetails);
 router.put("/complete/:id", completeEvent);
 router.get('/beneficiary-events', verifyBeneficiary, getEventsForBeneficiary);
-
+router.put('/reject/:id', rejectEvent);
 
 module.exports = router;

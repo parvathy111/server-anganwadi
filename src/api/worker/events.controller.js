@@ -179,7 +179,7 @@ const completeEvent = async (req, res) => {
 // GET /vaccines/beneficiary-events?anganwadiNo=ANG001&role=Mother
 const getEventsForBeneficiary = async (req, res) => {
     const { anganwadiNo, role } = req.user;
-console.log(role)
+
     try {
         const events = await Event.find({
             anganwadiNo,

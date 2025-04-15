@@ -26,7 +26,7 @@ const DailyTrackSchema = new mongoose.Schema({
         min: 0
     },
     studentImage: {
-        type: String, // Store image URL or file path
+        type: String, 
         required: false
     },
     todayMeal: {

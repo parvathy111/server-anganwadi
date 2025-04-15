@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const DailyTrack = require('./dailytrack.model');
-const { verifyWorker } = require('../../middlewares/authMiddleware'); // Middleware to verify worker
+const { verifyWorker, verifyBeneficiary } = require('../../middlewares/authMiddleware'); // Middleware to verify worker
+const { Parent, PregLactWomen } = require('../beneficiaries/beneficiaries.model');
 
 const router = express.Router();
 
@@ -91,6 +92,52 @@ router.get("/view", verifyWorker, async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 });
+
+
+
+// Get DailyTrack for logged-in beneficiary
+router.get('/beneficiary-view', verifyBeneficiary, async (req, res) => {
+    try {
+        const id = req.user._id; // from JWT payload
+        const role = req.user.role?.toLowerCase(); // normalize role to lowercase
+
+        if (role === 'preglactwomen') {
+            // User is PregLactWomen
+            const pregLacUser = await PregLactWomen.findById(id);
+            if (!pregLacUser) {
+                return res.status(404).json({ message: 'Pregnant/Lactating user not found' });
+            }
+
+            return res.status(200).json({ message: 'No child details for this user.' });
+        }
+
+        if (role === 'parent') {
+            // User is Parent
+            const parentUser = await Parent.findById(id);
+            if (!parentUser) {
+                return res.status(404).json({ message: 'Parent not found' });
+            }
+
+            const dailyTracks = await DailyTrack.find({
+                anganwadiNo: parentUser.anganwadiNo
+            }).sort({ createdAt: -1 });
+
+            return res.status(200).json({
+                childname: parentUser.childname,
+                anganwadiNo: parentUser.anganwadiNo,
+                dailyTracks
+            });
+        }
+
+        // If role is something unexpected
+        return res.status(400).json({ message: 'Invalid user role' });
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server Error' });
+    }
+});
+
 
 module.exports = router;
 

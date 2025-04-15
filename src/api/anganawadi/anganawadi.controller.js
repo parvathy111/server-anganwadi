@@ -1,7 +1,7 @@
 const express = require('express');
 const Anganwadi = require('./anganawadi.model');
-const { verifySupervisor } = require('../../middlewares/authMiddleware'); // Ensure authentication middleware is used
-
+const { verifySupervisor } = require('../../middlewares/authMiddleware'); 
+const { Parent, PregLactWomen } = require('../beneficiaries/beneficiaries.model');
 const router = express.Router();
 
 // Create a new Anganwadi
@@ -87,6 +87,53 @@ const deleteAnganwadi = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: error.message });
     }
 };
+
+
+//worker get anganawadi details + supervisor + beneficiaries
+router.get('/worker/view-anganwadi/:anganwadiNo', async (req, res) => {
+    try {
+        // Extract anganwadiNo from the request params
+        const workerAnganwadiNo = req.params.anganwadiNo;
+
+        if (!workerAnganwadiNo) {
+            return res.status(400).json({ message: 'Anganwadi No not found in the request' });
+        }
+
+        // Fetch Anganwadi details using the anganwadiNo from the request
+        const anganwadi = await Anganwadi.findOne({ anganwadiNo: workerAnganwadiNo })
+            .populate('createdBy', 'fullname email phone') // Populate supervisor's details
+            .lean();
+
+        if (!anganwadi) {
+            return res.status(404).json({ message: 'Anganwadi not found for the provided Anganwadi No' });
+        }
+
+        // Fetch the counts of parents and pregnant/lactating women
+        const parentCount = await Parent.countDocuments({ anganwadiNo: workerAnganwadiNo });
+        const pregLacCount = await PregLactWomen.countDocuments({ anganwadiNo: workerAnganwadiNo });
+
+        const totalBeneficiaries = parentCount + pregLacCount;
+
+        // Return the Anganwadi details
+        res.json({
+            anganwadi,
+            beneficiaryCount: totalBeneficiaries,
+            parentCount,
+            pregLacCount
+        });
+    } catch (err) {
+        console.error('Error fetching Anganwadi details:', err); // Log the error for debugging
+
+        // Provide more specific error messages
+        if (err.name === 'MongoError') {
+            return res.status(500).json({ message: 'Database error', error: err.message });
+        }
+
+        res.status(500).json({ message: 'Server error, failed to fetch Anganwadi details', error: err.message });
+    }
+});
+
+
 
 // Routes
 router.delete('/deleteanganwadi/:id', verifySupervisor, deleteAnganwadi);

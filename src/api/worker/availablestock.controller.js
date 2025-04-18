@@ -9,15 +9,18 @@ const { verifyWorker, verifyBeneficiary } = require('../../middlewares/authMiddl
 // ✅ Worker: View Available Stock in Their Anganwadi with itemId
 const getWorkerAvailableStock = async (req, res) => {
     try {
+      
         if (!req.user || !req.user.id) {
             return res.status(403).json({ message: "Unauthorized: Worker ID missing" });
         }
 
+       
         // Get worker's details to find their anganwadiNo
         const worker = await Worker.findById(req.user.id);
         if (!worker) {
             return res.status(404).json({ message: "Worker not found" });
         }
+        
 
         // Fetch available stock for the worker's anganwadi
         let availableStock = await AvailableStock.find({ anganwadiNo: worker.anganwadiNo });
@@ -25,6 +28,7 @@ const getWorkerAvailableStock = async (req, res) => {
         if (availableStock.length === 0) {
             return res.status(404).json({ message: "No available stock for your Anganwadi." });
         }
+
 
         // Fetch itemIds from OrderStock table and update in AvailableStock
         const updatedStock = await Promise.all(
@@ -39,6 +43,7 @@ const getWorkerAvailableStock = async (req, res) => {
                 return stockItem.toObject();
             })
         );
+
 
         // ✅ Merge stock items with the same itemId
         const mergedStock = updatedStock.reduce((acc, stockItem) => {
@@ -109,8 +114,8 @@ const getAvailableStockByAnganwadiNo = async (req, res) => {
 
 
 // ✅ Route for worker to view their available stock with itemId
-router.get("/:anganwadiNo", getAvailableStockByAnganwadiNo);
 router.get('/available-stock', verifyWorker, getWorkerAvailableStock);
+router.get("/:anganwadiNo", getAvailableStockByAnganwadiNo);
 router.put("/update-stock/:id", verifyWorker, updateAvailableStock);
 
 module.exports = router;

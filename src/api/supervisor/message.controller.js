@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Message = require('./message.model');
+const Worker = require('../worker/worker.model');
 
 const sendMessage = async (req, res) => {
   const { sender, receiver, text } = req.body;
@@ -63,10 +64,28 @@ const getConversation = async (req, res) => {
     }
   };
 
-  
+
+  // Get worker by anganwadi number
+const getWorkerByAnganwadiNo = async (req, res) => {
+  const { anganwadiNo } = req.params;
+
+  try {
+    const worker = await Worker.findOne({ anganwadiNo });
+
+    if (!worker) {
+      return res.status(404).json({ success: false, message: "Worker not found" });
+    }
+
+    res.status(200).json({ success: true, data: worker });
+  } catch (error) {
+    console.error("Error fetching worker by anganwadiNo:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
   
 // Use it in the route
 router.get('/conversation/:user1/:user2', getConversation);
 router.post('/send', sendMessage);
+router.get("/by-anganwadi/:anganwadiNo", getWorkerByAnganwadiNo);
 
 module.exports = router;

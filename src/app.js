@@ -16,6 +16,7 @@ const dailyTrackRoutes = require('./api/worker/dailytrack.controller');
 const availableStockRoutes = require('./api/worker/availablestock.controller');
 const messageRoutes = require('./api/supervisor/message.controller');
 const authRoutes = require('./api/auth/auth.controller');
+const notificationRoutes = require('./api/worker/notification.controller')
 
 const app = express();
 app.use(cors());
@@ -39,5 +40,7 @@ app.use('/worker-available-stock', availableStockRoutes);
 app.use('/messages', messageRoutes);
 
 app.use('/auth', authRoutes);
+
+app.use('/notification', notificationRoutes);
 
 module.exports = app;

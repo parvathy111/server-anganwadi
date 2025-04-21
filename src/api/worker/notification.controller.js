@@ -24,6 +24,7 @@ router.post('/send', async (req, res) => {
     const baseMessage = `Dear beneficiary, stock will be distributed at your Anganwadi center from ${formattedFrom} to ${formattedTo}. Please collect it within this period.`;
     const finalMessage = note ? `${baseMessage}\n\nNote: ${note}` : baseMessage;
 
+    // const validBeneficiaries = beneficiaries.filter(b => b.phone && b.phone.startsWith('+91'));
     console.log(finalMessage)
     // Send WhatsApp messages
     const results = await Promise.all(

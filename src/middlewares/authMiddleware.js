@@ -7,7 +7,7 @@ const { PregLactWomen } = require('../api/beneficiaries/beneficiaries.model');
 const { sendwhatsappMessage } = require('../utils/twilio');
 
 const auth = (req, res, next) => {
-    sendwhatsappMessage()
+    
     const authHeader = req.header('Authorization');
     const token = authHeader.split(" ").pop();
     if (!token) {
